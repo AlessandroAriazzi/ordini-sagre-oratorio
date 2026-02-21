@@ -49,3 +49,4 @@ app.*.map.json
 *.iml
 *.ipr
 *.iws
+*.dmg
