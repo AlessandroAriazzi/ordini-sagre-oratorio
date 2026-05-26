@@ -5,6 +5,7 @@ import 'screens/serata_detail_screen.dart';
 import 'screens/menu_editor_screen.dart';
 import 'screens/ordine_screen.dart';
 import 'screens/resoconto_screen.dart';
+import 'screens/settings_screen.dart';
 import 'widgets/main.layout.dart';
 
 
@@ -37,6 +38,10 @@ final router = GoRouter(
             final id = int.parse(state.pathParameters['id']!);
             return MenuEditorScreen(menuId: id);
           },
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsScreen(),
         ),
       ],
     ),

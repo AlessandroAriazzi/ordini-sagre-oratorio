@@ -27,7 +27,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: primaryColor,
         secondary: secondaryColor,
         surface: surfaceColor,
@@ -55,7 +55,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
         color: cardColor,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha:0.1),
       ),
       
       // Elevated Button Theme
@@ -166,7 +166,7 @@ class AppTheme {
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: Colors.grey.shade100,
-        selectedColor: secondaryColor.withOpacity(0.2),
+        selectedColor: secondaryColor.withValues(alpha:0.2),
         labelStyle: const TextStyle(color: textPrimary),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),

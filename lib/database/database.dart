@@ -72,7 +72,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Serate
-  Future<List<SerataData>> getAllSerate() async => select(serate).get();
+  Future<List<SerataData>> getAllSerate() async => (select(serate)..orderBy([(s) => OrderingTerm(expression: s.data, mode: OrderingMode.desc)])).get();
   Future<SerataData> getSerata(int id) => (select(serate)..where((s) => s.id.equals(id))).getSingle();
   Future<int> insertSerata(SerateCompanion serata) => into(serate).insert(serata);
   Future<bool> updateSerata(SerateCompanion serata) => update(serate).replace(serata);

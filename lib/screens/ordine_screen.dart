@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import '../providers/ordini_provider.dart';
 import '../providers/menu_provider.dart';
 import '../providers/serate_provider.dart';
+import '../providers/settings_provider.dart';
+import '../services/print_service.dart';
 import '../widgets/ordine_item_widget.dart';
 import '../widgets/totale_widget.dart';
 
@@ -21,146 +22,144 @@ class OrdineScreen extends ConsumerWidget {
     required this.ordineId,
   });
 
-  Future<void> _stampaOrdine(BuildContext context, WidgetRef ref) async {
-    final ordiniAsync = ref.read(ordiniNotifierProvider(serataId));
-    final serateAsync = ref.read(serateNotifierProvider);
-    
-    await ordiniAsync.when(
-      data: (ordini) async {
-        final ordineList = ordini.where((o) => o.id == ordineId).toList();
-        final ordine = ordineList.isNotEmpty ? ordineList.first : null;
-        if (ordine == null) return;
+  Future<List<int>> _buildPdf(
+    PdfPageFormat format,
+    dynamic ordine,
+    dynamic serata,
+  ) async {
+    final pdf = pw.Document();
 
-        await serateAsync.when(
-          data: (serate) async {
-            final serataList = serate.where((s) => s.id == serataId).toList();
-            final serata = serataList.isNotEmpty ? serataList.first : null;
-            if (serata == null) return;
-
-            final pdf = pw.Document();
-
-            pdf.addPage(
-              pw.Page(
-                pageFormat: PdfPageFormat.a4,
-                build: (context) {
-                  return pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format,
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Header(
+                level: 0,
+                child: pw.Text(
+                  'ORDINE #${ordine.id}',
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text('Serata: ${serata.titolo}'),
+              pw.Text(
+                  'Data: ${DateFormat('dd/MM/yyyy HH:mm').format(ordine.dataOra)}'),
+              pw.Divider(height: 30),
+              pw.Text(
+                'DETTAGLIO ORDINE',
+                style: pw.TextStyle(
+                    fontSize: 16, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 10),
+              pw.Table(
+                border: pw.TableBorder.all(),
+                children: [
+                  pw.TableRow(
+                    decoration:
+                        const pw.BoxDecoration(color: PdfColors.grey300),
                     children: [
-                      pw.Header(
-                        level: 0,
-                        child: pw.Text(
-                          'ORDINE #${ordine.id}',
-                          style: pw.TextStyle(
-                            fontSize: 24,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      pw.SizedBox(height: 20),
-                      pw.Text('Serata: ${serata.titolo}'),
-                      pw.Text('Data: ${DateFormat('dd/MM/yyyy HH:mm').format(ordine.dataOra)}'),
-                      pw.Divider(height: 30),
-                      pw.Text(
-                        'DETTAGLIO ORDINE',
-                        style: pw.TextStyle(
-                          fontSize: 16,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                      pw.SizedBox(height: 10),
-                      pw.Table(
-                        border: pw.TableBorder.all(),
-                        children: [
-                          pw.TableRow(
-                            decoration: const pw.BoxDecoration(
-                              color: PdfColors.grey300,
-                            ),
-                            children: [
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Prodotto',
-                                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Qtà',
-                                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Prezzo',
-                                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  'Totale',
-                                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                                ),
-                              ),
-                            ],
-                          ),
-                          ...ordine.items.map((item) {
-                            return pw.TableRow(
-                              children: [
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text(item.prodottoNome),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text('${item.quantita}'),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text('€ ${item.prezzoUnitario.toStringAsFixed(2)}'),
-                                ),
-                                pw.Padding(
-                                  padding: const pw.EdgeInsets.all(8),
-                                  child: pw.Text('€ ${item.totale.toStringAsFixed(2)}'),
-                                ),
-                              ],
-                            );
-                          }),
-                        ],
-                      ),
-                      pw.SizedBox(height: 20),
-                      pw.Divider(),
-                      pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.end,
-                        children: [
-                          pw.Text(
-                            'TOTALE: €${ordine.totale.toStringAsFixed(2)}',
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('Prodotto',
                             style: pw.TextStyle(
-                              fontSize: 18,
-                              fontWeight: pw.FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                                fontWeight: pw.FontWeight.bold)),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('Qtà',
+                            style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold)),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('Prezzo',
+                            style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold)),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(8),
+                        child: pw.Text('Totale',
+                            style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold)),
                       ),
                     ],
-                  );
-                },
+                  ),
+                  ...ordine.items.map<pw.TableRow>((item) {
+                    return pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(item.prodottoNome),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text('${item.quantita}'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(
+                              '€ ${item.prezzoUnitario.toStringAsFixed(2)}'),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8),
+                          child: pw.Text(
+                              '€ ${item.totale.toStringAsFixed(2)}'),
+                        ),
+                      ],
+                    );
+                  }),
+                ],
               ),
-            );
-
-            await Printing.layoutPdf(
-              onLayout: (format) async => pdf.save(),
-            );
-          },
-          loading: () {},
-          error: (_, __) {},
-        );
-      },
-      loading: () {},
-      error: (_, __) {},
+              pw.SizedBox(height: 20),
+              pw.Divider(),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    'TOTALE: €${ordine.totale.toStringAsFixed(2)}',
+                    style: pw.TextStyle(
+                        fontSize: 18, fontWeight: pw.FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
     );
+
+    return pdf.save();
+  }
+
+  Future<void> _stampaOrdine(BuildContext context, WidgetRef ref) async {
+    debugPrint('>>> _stampaOrdine avviato');
+
+    // Attende le settings anche se ancora in caricamento
+    final settings = await ref.read(settingsNotifierProvider.future);
+    debugPrint('>>> settings: isPdf=\${settings.isPdfMode} hasPrinter=\${settings.hasSelectedPrinter}');
+
+    final ordini = ref.read(ordiniNotifierProvider(serataId)).valueOrNull;
+    if (ordini == null) { debugPrint('>>> ordini null'); return; }
+    final ordine = ordini.where((o) => o.id == ordineId).firstOrNull;
+    if (ordine == null) { debugPrint('>>> ordine null'); return; }
+
+    final serate = ref.read(serateNotifierProvider).valueOrNull;
+    if (serate == null) { debugPrint('>>> serate null'); return; }
+    final serata = serate.where((s) => s.id == serataId).firstOrNull;
+    if (serata == null) { debugPrint('>>> serata null'); return; }
+
+    debugPrint('>>> chiamata PrintService.print');
+    await PrintService.print(
+      context: context,
+      settings: settings,
+      docName: 'Ordine #\${ordine.id}',
+      buildPdf: (format) => _buildPdf(format, ordine, serata),
+    );
+    debugPrint('>>> PrintService.print completato');
   }
 
   @override
@@ -170,8 +169,8 @@ class OrdineScreen extends ConsumerWidget {
 
     return ordiniAsync.when(
       data: (ordini) {
-        final ordineList = ordini.where((o) => o.id == ordineId).toList();
-        final ordine = ordineList.isNotEmpty ? ordineList.first : null;
+        final ordine =
+            ordini.where((o) => o.id == ordineId).firstOrNull;
         if (ordine == null) {
           return Scaffold(
             appBar: AppBar(title: const Text('Ordine non trovato')),
@@ -181,16 +180,18 @@ class OrdineScreen extends ConsumerWidget {
 
         return serateAsync.when(
           data: (serate) {
-            final serataList = serate.where((s) => s.id == serataId).toList();
-            final serata = serataList.isNotEmpty ? serataList.first : null;
+            final serata =
+                serate.where((s) => s.id == serataId).firstOrNull;
             final menuId = serata?.menuId;
 
             return Scaffold(
               appBar: AppBar(
                 title: Text('Ordine #${ordine.id}'),
-                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                backgroundColor:
+                    Theme.of(context).colorScheme.inversePrimary,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
+                  icon: const Icon(Icons.arrow_back,
+                      color: Colors.blueAccent),
                   onPressed: () => context.go('/serata/$serataId'),
                 ),
                 actions: [
@@ -206,9 +207,12 @@ class OrdineScreen extends ConsumerWidget {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
                           title: const Text('Conferma eliminazione'),
-                          content: const Text('Vuoi davvero eliminare questo ordine?\n\nLe quantità dei prodotti verranno ripristinate.'),
+                          content: const Text(
+                              'Vuoi davvero eliminare questo ordine?\n\n'
+                              'Le quantità dei prodotti verranno ripristinate.'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
@@ -218,11 +222,14 @@ class OrdineScreen extends ConsumerWidget {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(12)),
                               ),
                               onPressed: () {
                                 ref
-                                    .read(ordiniNotifierProvider(serataId).notifier)
+                                    .read(ordiniNotifierProvider(serataId)
+                                        .notifier)
                                     .deleteOrdine(ordineId);
                                 Navigator.pop(context);
                                 context.go('/serata/$serataId');
@@ -244,16 +251,22 @@ class OrdineScreen extends ConsumerWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.shopping_cart, size: 80, color: Colors.grey.shade400),
+                                Icon(Icons.shopping_cart,
+                                    size: 80,
+                                    color: Colors.grey.shade400),
                                 const SizedBox(height: 24),
                                 const Text(
                                   'Ordine vuoto',
-                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey),
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey),
                                 ),
                                 const SizedBox(height: 8),
                                 const Text(
                                   'Aggiungi prodotti dal menù sottostante',
-                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -269,16 +282,22 @@ class OrdineScreen extends ConsumerWidget {
                                   if (newQuantity > 0) {
                                     try {
                                       ref
-                                          .read(ordiniNotifierProvider(serataId).notifier)
+                                          .read(ordiniNotifierProvider(
+                                                  serataId)
+                                              .notifier)
                                           .updateItemQuantita(
                                             item.id!,
                                             ordineId,
                                             newQuantity,
                                           );
                                     } catch (e) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         SnackBar(
-                                          content: Text(e.toString().replaceAll('Exception: ', '')),
+                                          content: Text(e
+                                              .toString()
+                                              .replaceAll(
+                                                  'Exception: ', '')),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -287,8 +306,10 @@ class OrdineScreen extends ConsumerWidget {
                                 },
                                 onDelete: () {
                                   ref
-                                      .read(ordiniNotifierProvider(serataId).notifier)
-                                      .removeItemFromOrdine(item.id!, ordineId);
+                                      .read(ordiniNotifierProvider(serataId)
+                                          .notifier)
+                                      .removeItemFromOrdine(
+                                          item.id!, ordineId);
                                 },
                               );
                             },
@@ -301,36 +322,47 @@ class OrdineScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: Colors.grey.shade50,
                         border: Border(
-                          top: BorderSide(color: Colors.grey.shade300, width: 2),
+                          top: BorderSide(
+                              color: Colors.grey.shade300, width: 2),
                         ),
                       ),
                       child: Consumer(
                         builder: (context, ref, _) {
-                          final menuAsync = ref.watch(menuByIdProvider(menuId));
+                          final menuAsync =
+                              ref.watch(menuByIdProvider(menuId));
                           return menuAsync.when(
                             data: (menu) {
-                              if (menu == null || menu.prodotti.isEmpty) {
+                              if (menu == null ||
+                                  menu.prodotti.isEmpty) {
                                 return const Center(
                                   child: Text(
                                     'Nessun prodotto disponibile nel menù',
-                                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                                    style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 16),
                                   ),
                                 );
                               }
 
-                              // Raggruppa per categoria
-                              final prodottiPerCategoria = <String, List>{};
+                              final prodottiPerCategoria =
+                                  <String, List>{};
                               for (final prodotto in menu.prodotti) {
-                                prodottiPerCategoria.putIfAbsent(prodotto.categoria, () => []).add(prodotto);
+                                prodottiPerCategoria
+                                    .putIfAbsent(
+                                        prodotto.categoria, () => [])
+                                    .add(prodotto);
                               }
 
                               return SingleChildScrollView(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
                                     const Row(
                                       children: [
-                                        Icon(Icons.add_shopping_cart, size: 24),
+                                        Icon(
+                                            Icons.add_shopping_cart,
+                                            size: 24),
                                         SizedBox(width: 12),
                                         Text(
                                           'Aggiungi prodotto:',
@@ -342,118 +374,206 @@ class OrdineScreen extends ConsumerWidget {
                                       ],
                                     ),
                                     const SizedBox(height: 16),
-                                    ...prodottiPerCategoria.entries.map((entry) {
+                                    ...prodottiPerCategoria.entries
+                                        .map((entry) {
                                       return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 8),
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 8),
                                             child: Text(
                                               entry.key,
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.blue.shade700,
+                                                fontWeight:
+                                                    FontWeight.bold,
+                                                color: Colors
+                                                    .blue.shade700,
                                               ),
                                             ),
                                           ),
                                           Wrap(
                                             spacing: 8,
                                             runSpacing: 8,
-                                            children: entry.value.map<Widget>((prodotto) {
-                                              final isEsaurito = prodotto.isEsaurito;
+                                            children: entry.value
+                                                .map<Widget>((prodotto) {
+                                              final isEsaurito =
+                                                  prodotto.isEsaurito;
                                               return ActionChip(
                                                 avatar: Icon(
-                                                  isEsaurito ? Icons.block : Icons.add,
+                                                  isEsaurito
+                                                      ? Icons.block
+                                                      : Icons.add,
                                                   size: 18,
-                                                  color: isEsaurito ? Colors.red : Colors.green,
+                                                  color: isEsaurito
+                                                      ? Colors.red
+                                                      : Colors.green,
                                                 ),
                                                 label: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   children: [
                                                     Text(
                                                       prodotto.nome,
                                                       style: TextStyle(
-                                                        color: isEsaurito ? Colors.grey : Colors.black,
-                                                        decoration: isEsaurito ? TextDecoration.lineThrough : null,
+                                                        color: isEsaurito
+                                                            ? Colors.grey
+                                                            : Colors
+                                                                .black,
+                                                        decoration:
+                                                            isEsaurito
+                                                                ? TextDecoration
+                                                                    .lineThrough
+                                                                : null,
                                                       ),
                                                     ),
-                                                    const SizedBox(width: 8),
+                                                    const SizedBox(
+                                                        width: 8),
                                                     Text(
                                                       '(€${prodotto.prezzo.toStringAsFixed(2)})',
                                                       style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        color: isEsaurito ? Colors.grey : Colors.green.shade700,
+                                                        fontWeight:
+                                                            FontWeight
+                                                                .bold,
+                                                        color: isEsaurito
+                                                            ? Colors.grey
+                                                            : Colors.green
+                                                                .shade700,
                                                       ),
                                                     ),
                                                     if (!isEsaurito) ...[
-                                                      const SizedBox(width: 8),
+                                                      const SizedBox(
+                                                          width: 8),
                                                       Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                        decoration: BoxDecoration(
-                                                          color: prodotto.quantita < 10 
-                                                            ? Colors.orange.shade100 
-                                                            : Colors.green.shade100,
-                                                          borderRadius: BorderRadius.circular(8),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal:
+                                                                    6,
+                                                                vertical:
+                                                                    2),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: prodotto
+                                                                      .quantita <
+                                                                  10
+                                                              ? Colors
+                                                                  .orange
+                                                                  .shade100
+                                                              : Colors
+                                                                  .green
+                                                                  .shade100,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8),
                                                         ),
                                                         child: Text(
                                                           '${prodotto.quantita}',
                                                           style: TextStyle(
                                                             fontSize: 11,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: prodotto.quantita < 10 
-                                                              ? Colors.orange.shade700 
-                                                              : Colors.green.shade700,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold,
+                                                            color: prodotto
+                                                                        .quantita <
+                                                                    10
+                                                                ? Colors
+                                                                    .orange
+                                                                    .shade700
+                                                                : Colors
+                                                                    .green
+                                                                    .shade700,
                                                           ),
                                                         ),
                                                       ),
                                                     ],
                                                     if (isEsaurito)
                                                       Container(
-                                                        margin: const EdgeInsets.only(left: 8),
-                                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.red.shade100,
-                                                          borderRadius: BorderRadius.circular(8),
+                                                        margin:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 8),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal:
+                                                                    6,
+                                                                vertical:
+                                                                    2),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .red
+                                                              .shade100,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8),
                                                         ),
                                                         child: Text(
                                                           'ESAURITO',
                                                           style: TextStyle(
                                                             fontSize: 11,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: Colors.red.shade700,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold,
+                                                            color: Colors
+                                                                .red
+                                                                .shade700,
                                                           ),
                                                         ),
                                                       ),
                                                   ],
                                                 ),
-                                                backgroundColor: isEsaurito ? Colors.grey.shade200 : null,
-                                                onPressed: isEsaurito ? null : () {
-                                                  try {
-                                                    ref
-                                                        .read(ordiniNotifierProvider(serataId).notifier)
-                                                        .addItemToOrdine(
-                                                          ordineId,
-                                                          prodotto.id!,
-                                                          prodotto.nome,
-                                                          prodotto.prezzo,
-                                                        );
-                                                  } catch (e) {
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(e.toString().replaceAll('Exception: ', '')),
-                                                        backgroundColor: Colors.red,
-                                                      ),
-                                                    );
-                                                  }
-                                                },
+                                                backgroundColor:
+                                                    isEsaurito
+                                                        ? Colors
+                                                            .grey.shade200
+                                                        : null,
+                                                onPressed: isEsaurito
+                                                    ? null
+                                                    : () {
+                                                        try {
+                                                          ref
+                                                              .read(ordiniNotifierProvider(
+                                                                      serataId)
+                                                                  .notifier)
+                                                              .addItemToOrdine(
+                                                                ordineId,
+                                                                prodotto
+                                                                    .id!,
+                                                                prodotto
+                                                                    .nome,
+                                                                prodotto
+                                                                    .prezzo,
+                                                              );
+                                                        } catch (e) {
+                                                          ScaffoldMessenger
+                                                                  .of(context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(
+                                                                  e.toString().replaceAll(
+                                                                      'Exception: ',
+                                                                      '')),
+                                                              backgroundColor:
+                                                                  Colors
+                                                                      .red,
+                                                            ),
+                                                          );
+                                                        }
+                                                      },
                                               );
                                             }).toList(),
                                           ),
                                           const SizedBox(height: 12),
                                         ],
                                       );
-                                    }).toList(),
+                                    }),
                                   ],
                                 ),
                               );
@@ -467,7 +587,8 @@ class OrdineScreen extends ConsumerWidget {
                             error: (_, __) => const Center(
                               child: Text(
                                 'Errore caricamento menù',
-                                style: TextStyle(color: Colors.red, fontSize: 16),
+                                style: TextStyle(
+                                    color: Colors.red, fontSize: 16),
                               ),
                             ),
                           );

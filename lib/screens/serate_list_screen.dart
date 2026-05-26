@@ -45,7 +45,7 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withOpacity(0.7)],
+                          colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha:0.7)],
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -176,7 +176,7 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
               color: AppTheme.surfaceColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha:0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -188,7 +188,7 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withOpacity(0.7)],
+                      colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha:0.7)],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -386,7 +386,7 @@ class _SerataCardState extends State<_SerataCard> {
                     height: 60,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withOpacity(0.7)],
+                        colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha:0.7)],
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -435,7 +435,7 @@ class _SerataCardState extends State<_SerataCard> {
                                   return Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.successColor.withOpacity(0.1),
+                                      color: AppTheme.successColor.withValues(alpha:0.1),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Row(
@@ -462,7 +462,7 @@ class _SerataCardState extends State<_SerataCard> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.warningColor.withOpacity(0.1),
+                                  color: AppTheme.warningColor.withValues(alpha:0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Row(

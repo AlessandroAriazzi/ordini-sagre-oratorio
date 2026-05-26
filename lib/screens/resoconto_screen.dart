@@ -1,286 +1,254 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import '../providers/ordini_provider.dart';
 import '../providers/serate_provider.dart';
+import '../providers/settings_provider.dart';
+import '../services/print_service.dart';
 
 class ResocontoScreen extends ConsumerWidget {
   final int serataId;
 
   const ResocontoScreen({super.key, required this.serataId});
 
-  Future<void> _esportaPDF(BuildContext context, WidgetRef ref) async {
-    final ordiniAsync = ref.read(ordiniNotifierProvider(serataId));
-    final serateAsync = ref.read(serateNotifierProvider);
+  Future<List<int>> _buildPdf(
+    PdfPageFormat format,
+    List<dynamic> ordini,
+    dynamic serata,
+  ) async {
+    final totaleGenerale =
+        ordini.fold(0.0, (sum, o) => sum + o.totale);
+    final numOrdini = ordini.length;
+    int numProdottiTotali = 0;
+    for (final o in ordini) {
+      for (final item in o.items) {
+        numProdottiTotali += (item.quantita as int);
+      }
+    }
 
-    await ordiniAsync.when(
-      data: (ordini) async {
-        await serateAsync.when(
-          data: (serate) async {
-            final serata = serate.where((s) => s.id == serataId).firstOrNull;
-            if (serata == null) return;
+    final Map<String, Map<String, dynamic>> prodottiStats = {};
+    for (final ordine in ordini) {
+      for (final item in ordine.items) {
+        if (!prodottiStats.containsKey(item.prodottoNome)) {
+          prodottiStats[item.prodottoNome] = {
+            'quantita': 0,
+            'totale': 0.0,
+            'prezzo': item.prezzoUnitario,
+          };
+        }
+        prodottiStats[item.prodottoNome]!['quantita'] += item.quantita;
+        prodottiStats[item.prodottoNome]!['totale'] += item.totale;
+      }
+    }
 
-            final totaleGenerale = ordini.fold(0.0, (sum, ordine) => sum + ordine.totale);
-            final numOrdini = ordini.length;
-            final numProdottiTotali = ordini.fold(
-              0,
-              (sum, ordine) => sum + ordine.items.fold(0, (s, item) => s + item.quantita),
-            );
+    final pdf = pw.Document();
 
-            // Calcola statistiche prodotti
-            final Map<String, Map<String, dynamic>> prodottiStats = {};
-            for (final ordine in ordini) {
-              for (final item in ordine.items) {
-                if (!prodottiStats.containsKey(item.prodottoNome)) {
-                  prodottiStats[item.prodottoNome] = {
-                    'quantita': 0,
-                    'totale': 0.0,
-                    'prezzo': item.prezzoUnitario,
-                  };
-                }
-                prodottiStats[item.prodottoNome]!['quantita'] += item.quantita;
-                prodottiStats[item.prodottoNome]!['totale'] += item.totale;
-              }
-            }
-
-            final pdf = pw.Document();
-
-            pdf.addPage(
-              pw.MultiPage(
-                pageFormat: PdfPageFormat.a4,
-                build: (context) {
-                  return [
-                    pw.Header(
-                      level: 0,
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text(
-                            'RESOCONTO SERATA',
-                            style: pw.TextStyle(
-                              fontSize: 24,
-                              fontWeight: pw.FontWeight.bold,
-                            ),
-                          ),
-                          pw.SizedBox(height: 10),
-                          pw.Text(
-                            serata.titolo,
-                            style: pw.TextStyle(
-                              fontSize: 18,
-                              fontWeight: pw.FontWeight.bold,
-                            ),
-                          ),
-                          pw.Text(
-                            DateFormat('dd/MM/yyyy').format(serata.data),
-                            style: const pw.TextStyle(color: PdfColors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                    pw.SizedBox(height: 20),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(16),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.grey200,
-                        borderRadius: pw.BorderRadius.circular(8),
-                      ),
-                      child: pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildStatCard('Ordini totali', '$numOrdini'),
-                          _buildStatCard('Prodotti venduti', '$numProdottiTotali'),
-                          _buildStatCard(
-                            'Incasso totale',
-                            '€${totaleGenerale.toStringAsFixed(2)}',
-                          ),
-                        ],
-                      ),
-                    ),
-                    pw.SizedBox(height: 30),
-                    pw.Text(
-                      'STATISTICHE PRODOTTI',
-                      style: pw.TextStyle(
-                        fontSize: 16,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.SizedBox(height: 10),
-                    pw.Table(
-                      border: pw.TableBorder.all(),
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: format,
+        build: (context) {
+          return [
+            pw.Header(
+              level: 0,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'RESOCONTO SERATA',
+                    style: pw.TextStyle(
+                        fontSize: 24, fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.SizedBox(height: 10),
+                  pw.Text(
+                    serata.titolo,
+                    style: pw.TextStyle(
+                        fontSize: 18, fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.Text(
+                    DateFormat('dd/MM/yyyy').format(serata.data),
+                    style:
+                        const pw.TextStyle(color: PdfColors.grey),
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 20),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(16),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey200,
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+                children: [
+                  _pdfStatCard('Ordini totali', '$numOrdini'),
+                  _pdfStatCard(
+                      'Prodotti venduti', '$numProdottiTotali'),
+                  _pdfStatCard('Incasso totale',
+                      '€${totaleGenerale.toStringAsFixed(2)}'),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 30),
+            pw.Text(
+              'STATISTICHE PRODOTTI',
+              style: pw.TextStyle(
+                  fontSize: 16, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 10),
+            pw.Table(
+              border: pw.TableBorder.all(),
+              children: [
+                pw.TableRow(
+                  decoration:
+                      const pw.BoxDecoration(color: PdfColors.grey300),
+                  children: [
+                    'Prodotto', 'Quantità', 'Prezzo unitario', 'Totale'
+                  ]
+                      .map((h) => pw.Padding(
+                            padding: const pw.EdgeInsets.all(8),
+                            child: pw.Text(h,
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ))
+                      .toList(),
+                ),
+                ...prodottiStats.entries.map((entry) {
+                  return pw.TableRow(
+                    children: [
+                      entry.key,
+                      '${entry.value['quantita']}',
+                      '€${entry.value['prezzo'].toStringAsFixed(2)}',
+                      '€${entry.value['totale'].toStringAsFixed(2)}',
+                    ]
+                        .map((t) => pw.Padding(
+                              padding: const pw.EdgeInsets.all(8),
+                              child: pw.Text(t),
+                            ))
+                        .toList(),
+                  );
+                }),
+              ],
+            ),
+            pw.SizedBox(height: 30),
+            pw.Text(
+              'DETTAGLIO ORDINI',
+              style: pw.TextStyle(
+                  fontSize: 16, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 10),
+            ...ordini.map<pw.Widget>((ordine) {
+              return pw.Container(
+                margin: const pw.EdgeInsets.only(bottom: 16),
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey),
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      mainAxisAlignment:
+                          pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.TableRow(
-                          decoration: const pw.BoxDecoration(
-                            color: PdfColors.grey300,
-                          ),
-                          children: [
-                            pw.Padding(
-                              padding: const pw.EdgeInsets.all(8),
-                              child: pw.Text(
-                                'Prodotto',
-                                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                              ),
-                            ),
-                            pw.Padding(
-                              padding: const pw.EdgeInsets.all(8),
-                              child: pw.Text(
-                                'Quantità',
-                                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                              ),
-                            ),
-                            pw.Padding(
-                              padding: const pw.EdgeInsets.all(8),
-                              child: pw.Text(
-                                'Prezzo unitario',
-                                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                              ),
-                            ),
-                            pw.Padding(
-                              padding: const pw.EdgeInsets.all(8),
-                              child: pw.Text(
-                                'Totale',
-                                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                              ),
-                            ),
-                          ],
+                        pw.Text('Ordine #${ordine.id}',
+                            style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          DateFormat('HH:mm').format(ordine.dataOra),
+                          style: const pw.TextStyle(
+                              color: PdfColors.grey),
                         ),
-                        ...prodottiStats.entries.map((entry) {
-                          return pw.TableRow(
-                            children: [
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(entry.key),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text('${entry.value['quantita']}'),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  '€${entry.value['prezzo'].toStringAsFixed(2)}',
-                                ),
-                              ),
-                              pw.Padding(
-                                padding: const pw.EdgeInsets.all(8),
-                                child: pw.Text(
-                                  '€${entry.value['totale'].toStringAsFixed(2)}',
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
                       ],
                     ),
-                    pw.SizedBox(height: 30),
-                    pw.Text(
-                      'DETTAGLIO ORDINI',
-                      style: pw.TextStyle(
-                        fontSize: 16,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.SizedBox(height: 10),
-                    ...ordini.map((ordine) {
-                      return pw.Container(
-                        margin: const pw.EdgeInsets.only(bottom: 16),
-                        padding: const pw.EdgeInsets.all(12),
-                        decoration: pw.BoxDecoration(
-                          border: pw.Border.all(color: PdfColors.grey),
-                          borderRadius: pw.BorderRadius.circular(4),
-                        ),
-                        child: pw.Column(
-                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    pw.SizedBox(height: 8),
+                    ...ordine.items.map<pw.Widget>((item) {
+                      return pw.Padding(
+                        padding:
+                            const pw.EdgeInsets.only(left: 16, top: 4),
+                        child: pw.Row(
+                          mainAxisAlignment:
+                              pw.MainAxisAlignment.spaceBetween,
                           children: [
-                            pw.Row(
-                              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                              children: [
-                                pw.Text(
-                                  'Ordine #${ordine.id}',
-                                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                                ),
-                                pw.Text(
-                                  DateFormat('HH:mm').format(ordine.dataOra),
-                                  style: const pw.TextStyle(color: PdfColors.grey),
-                                ),
-                              ],
-                            ),
-                            pw.SizedBox(height: 8),
-                            ...ordine.items.map((item) {
-                              return pw.Padding(
-                                padding: const pw.EdgeInsets.only(left: 16, top: 4),
-                                child: pw.Row(
-                                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    pw.Text('${item.quantita}x ${item.prodottoNome}'),
-                                    pw.Text('€${item.totale.toStringAsFixed(2)}'),
-                                  ],
-                                ),
-                              );
-                            }),
-                            pw.Divider(height: 16),
-                            pw.Row(
-                              mainAxisAlignment: pw.MainAxisAlignment.end,
-                              children: [
-                                pw.Text(
-                                  'Totale: €${ordine.totale.toStringAsFixed(2)}',
-                                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                                ),
-                              ],
-                            ),
+                            pw.Text(
+                                '${item.quantita}x ${item.prodottoNome}'),
+                            pw.Text(
+                                '€${item.totale.toStringAsFixed(2)}'),
                           ],
                         ),
                       );
                     }),
-                  ];
-                },
-              ),
-            );
+                    pw.Divider(height: 16),
+                    pw.Row(
+                      mainAxisAlignment:
+                          pw.MainAxisAlignment.end,
+                      children: [
+                        pw.Text(
+                          'Totale: €${ordine.totale.toStringAsFixed(2)}',
+                          style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ];
+        },
+      ),
+    );
 
-            await Printing.layoutPdf(
-              onLayout: (format) async => pdf.save(),
-            );
-          },
-          loading: () {},
-          error: (_, __) {},
-        );
-      },
-      loading: () {},
-      error: (_, __) {},
+    return pdf.save();
+  }
+
+  pw.Widget _pdfStatCard(String label, String value) {
+    return pw.Column(
+      children: [
+        pw.Text(value,
+            style: pw.TextStyle(
+                fontSize: 24, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 4),
+        pw.Text(label,
+            style: const pw.TextStyle(
+                fontSize: 12, color: PdfColors.grey700)),
+      ],
     );
   }
 
-  pw.Widget _buildStatCard(String label, String value) {
-    return pw.Column(
-      children: [
-        pw.Text(
-          value,
-          style: pw.TextStyle(
-            fontSize: 24,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-        pw.SizedBox(height: 4),
-        pw.Text(
-          label,
-          style: const pw.TextStyle(
-            fontSize: 12,
-            color: PdfColors.grey700,
-          ),
-        ),
-      ],
+  Future<void> _esportaPDF(BuildContext context, WidgetRef ref) async {
+    debugPrint('>>> _esportaPDF avviato');
+
+    final settings = await ref.read(settingsNotifierProvider.future);
+    debugPrint('>>> settings: isPdf=\${settings.isPdfMode} hasPrinter=\${settings.hasSelectedPrinter}');
+
+    final ordini = ref.read(ordiniNotifierProvider(serataId)).valueOrNull;
+    if (ordini == null) { debugPrint('>>> ordini null'); return; }
+
+    final serate = ref.read(serateNotifierProvider).valueOrNull;
+    if (serate == null) { debugPrint('>>> serate null'); return; }
+    final serata = serate.where((s) => s.id == serataId).firstOrNull;
+    if (serata == null) { debugPrint('>>> serata null'); return; }
+
+    debugPrint('>>> chiamata PrintService.print');
+    await PrintService.print(
+      context: context,
+      settings: settings,
+      docName: 'Resoconto - \${serata.titolo}',
+      buildPdf: (format) => _buildPdf(format, ordini, serata),
     );
+    debugPrint('>>> PrintService.print completato');
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordiniAsync = ref.watch(ordiniNotifierProvider(serataId));
     final serateAsync = ref.watch(serateNotifierProvider);
-
-    debugPrint('ResocontoScreen initialized with serataId: $serataId');
 
     return Scaffold(
       appBar: AppBar(
@@ -293,7 +261,7 @@ class ResocontoScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
-            tooltip: 'Esporta PDF',
+            tooltip: 'Esporta / Stampa',
             onPressed: () => _esportaPDF(context, ref),
           ),
         ],
@@ -302,19 +270,25 @@ class ResocontoScreen extends ConsumerWidget {
         data: (ordini) {
           return serateAsync.when(
             data: (serate) {
-              final serata = serate.where((s) => s.id == serataId).firstOrNull;
+              final serata =
+                  serate.where((s) => s.id == serataId).firstOrNull;
               if (serata == null) {
                 return const Center(child: Text('Serata non trovata'));
               }
 
-              final totaleGenerale = ordini.fold(0.0, (sum, ordine) => sum + ordine.totale);
+              final totaleGenerale =
+                  ordini.fold(0.0, (sum, o) => sum + o.totale);
               final numOrdini = ordini.length;
-              final numProdottiTotali = ordini.fold(
-                0,
-                (sum, ordine) => sum + ordine.items.fold(0, (s, item) => s + item.quantita),
-              );
+              final numProdottiTotali = () {
+                int total = 0;
+                for (final o in ordini) {
+                  for (final item in o.items) {
+                    total += item.quantita;
+                  }
+                }
+                return total;
+              }();
 
-              // Calcola statistiche prodotti
               final Map<String, Map<String, dynamic>> prodottiStats = {};
               for (final ordine in ordini) {
                 for (final item in ordine.items) {
@@ -325,8 +299,10 @@ class ResocontoScreen extends ConsumerWidget {
                       'prezzo': item.prezzoUnitario,
                     };
                   }
-                  prodottiStats[item.prodottoNome]!['quantita'] += item.quantita;
-                  prodottiStats[item.prodottoNome]!['totale'] += item.totale;
+                  prodottiStats[item.prodottoNome]!['quantita'] +=
+                      item.quantita;
+                  prodottiStats[item.prodottoNome]!['totale'] +=
+                      item.totale;
                 }
               }
 
@@ -344,13 +320,14 @@ class ResocontoScreen extends ConsumerWidget {
                             Text(
                               serata.titolo,
                               style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              DateFormat('EEEE dd MMMM yyyy', 'it_IT').format(serata.data),
-                              style: const TextStyle(color: Colors.grey),
+                              DateFormat('EEEE dd MMMM yyyy', 'it_IT')
+                                  .format(serata.data),
+                              style:
+                                  const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -381,7 +358,8 @@ class ResocontoScreen extends ConsumerWidget {
                           child: _StatCard(
                             icon: Icons.euro,
                             label: 'Incasso totale',
-                            value: '€${totaleGenerale.toStringAsFixed(2)}',
+                            value:
+                                '€${totaleGenerale.toStringAsFixed(2)}',
                             color: Colors.green,
                           ),
                         ),
@@ -391,9 +369,7 @@ class ResocontoScreen extends ConsumerWidget {
                     const Text(
                       'Statistiche Prodotti',
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     Card(
@@ -402,7 +378,8 @@ class ResocontoScreen extends ConsumerWidget {
                         child: Column(
                           children: prodottiStats.entries.map((entry) {
                             return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
                                 children: [
                                   Expanded(
@@ -410,8 +387,7 @@ class ResocontoScreen extends ConsumerWidget {
                                     child: Text(
                                       entry.key,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   Expanded(
@@ -431,9 +407,8 @@ class ResocontoScreen extends ConsumerWidget {
                                       '€${entry.value['totale'].toStringAsFixed(2)}',
                                       textAlign: TextAlign.right,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
-                                      ),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green),
                                     ),
                                   ),
                                 ],
@@ -447,9 +422,7 @@ class ResocontoScreen extends ConsumerWidget {
                     const Text(
                       'Dettaglio Ordini',
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     ListView.builder(
@@ -466,7 +439,8 @@ class ResocontoScreen extends ConsumerWidget {
                             ),
                             title: Text(
                               'Ordine #${ordine.id}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
                               DateFormat('HH:mm').format(ordine.dataOra),
@@ -479,12 +453,11 @@ class ResocontoScreen extends ConsumerWidget {
                                 color: Colors.green,
                               ),
                             ),
-                            children: ordine.items.map((item) {
+                            children: ordine.items.map<Widget>((item) {
                               return ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 72,
-                                  vertical: 4,
-                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(
+                                        horizontal: 72, vertical: 4),
                                 title: Text(item.prodottoNome),
                                 trailing: Text(
                                   '${item.quantita}x €${item.prezzoUnitario.toStringAsFixed(2)} = €${item.totale.toStringAsFixed(2)}',
@@ -499,12 +472,15 @@ class ResocontoScreen extends ConsumerWidget {
                 ),
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Center(child: Text('Errore caricamento serata')),
+            loading: () =>
+                const Center(child: CircularProgressIndicator()),
+            error: (_, __) =>
+                const Center(child: Text('Errore caricamento serata')),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Errore: $error')),
+        error: (error, _) =>
+            Center(child: Text('Errore: $error')),
       ),
     );
   }
@@ -536,18 +512,14 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: color),
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
           ],

@@ -124,6 +124,17 @@ class _MainLayoutState extends State<MainLayout> {
                   ),
                   
                   const Divider(color: AppTheme.navbarHover, height: 1),
+
+                  // Settings Item
+                  _NavItem(
+                    icon: Icons.settings_rounded,
+                    label: 'Impostazioni',
+                    isSelected: widget.currentPath == '/settings',
+                    isExpanded: isExpanded,
+                    onTap: () => context.go('/settings'),
+                  ),
+
+                  const Divider(color: AppTheme.navbarHover, height: 1),
                   
                   // Toggle Button
                   InkWell(

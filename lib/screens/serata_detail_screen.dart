@@ -63,7 +63,7 @@ class SerataDetailScreen extends ConsumerWidget {
                               padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withOpacity(0.7)],
+                                  colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha: 0.7)],
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -142,7 +142,7 @@ class SerataDetailScreen extends ConsumerWidget {
                                   icon: const Icon(Icons.add_rounded),
                                   tooltip: 'Crea nuovo menù',
                                   style: IconButton.styleFrom(
-                                    backgroundColor: AppTheme.secondaryColor.withOpacity(0.1),
+                                    backgroundColor: AppTheme.secondaryColor.withValues(alpha:0.1),
                                     foregroundColor: AppTheme.secondaryColor,
                                   ),
                                   onPressed: () => context.go('/menu/new'),
@@ -152,7 +152,7 @@ class SerataDetailScreen extends ConsumerWidget {
                                     icon: const Icon(Icons.edit_rounded),
                                     tooltip: 'Modifica menù',
                                     style: IconButton.styleFrom(
-                                      backgroundColor: AppTheme.successColor.withOpacity(0.1),
+                                      backgroundColor: AppTheme.successColor.withValues(alpha:0.1),
                                       foregroundColor: AppTheme.successColor,
                                     ),
                                     onPressed: () => context.go('/menu/${currentMenu.id}'),
@@ -245,7 +245,7 @@ class SerataDetailScreen extends ConsumerWidget {
                               height: 50,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [AppTheme.successColor, AppTheme.successColor.withOpacity(0.7)],
+                                  colors: [AppTheme.successColor, AppTheme.successColor.withValues(alpha:0.7)],
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),

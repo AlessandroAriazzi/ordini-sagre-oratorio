@@ -567,7 +567,7 @@ class _MenuEditorScreenState extends ConsumerState<MenuEditorScreen> {
                           const SizedBox(height: 24),
                         ],
                       );
-                    }).toList(),
+                    }),
                 ],
               ),
             );

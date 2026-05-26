@@ -27,12 +27,12 @@ class HomeScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withOpacity(0.7)],
+                        colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha: 0.7)],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.secondaryColor.withOpacity(0.3),
+                          color: AppTheme.secondaryColor.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -211,7 +211,7 @@ class HomeScreen extends ConsumerWidget {
                           leading: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppTheme.secondaryColor.withOpacity(0.1),
+                              color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
@@ -315,7 +315,7 @@ class _StatCardState extends State<_StatCard> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: widget.color.withOpacity(0.1),
+                          color: widget.color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -409,7 +409,7 @@ class _ActionCardState extends State<_ActionCard> {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [widget.color, widget.color.withOpacity(0.7)],
+                        colors: [widget.color, widget.color.withValues(alpha: 0.7)],
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
