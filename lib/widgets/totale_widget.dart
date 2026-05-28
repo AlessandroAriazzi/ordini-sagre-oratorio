@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme.dart';
 
 class TotaleWidget extends StatelessWidget {
   final double totale;
@@ -11,13 +12,13 @@ class TotaleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: AppTheme.successColor.withValues(alpha: 0.06),
         border: Border(
           top: BorderSide(
-            color: Colors.green.shade200,
-            width: 2,
+            color: AppTheme.successColor.withValues(alpha: 0.25),
+            width: 1,
           ),
         ),
       ),
@@ -25,18 +26,21 @@ class TotaleWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
-            'TOTALE:',
+            'TOTALE',
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: AppTheme.textSecondary,
             ),
           ),
           Text(
             '€${totale.toStringAsFixed(2)}',
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: AppTheme.successColor,
+              letterSpacing: -0.3,
             ),
           ),
         ],

@@ -30,125 +30,188 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
     return showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            width: 500,
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha:0.7)],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.event_rounded, color: Colors.white, size: 28),
+        builder: (context, setDialogState) => Dialog(
+          child: SizedBox(
+            width: 480,
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Nuova Serata',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
                     ),
-                    const SizedBox(width: 16),
-                    const Text(
-                      'Nuova Serata',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-                TextField(
-                  controller: _titoloController,
-                  decoration: const InputDecoration(
-                    labelText: 'Titolo della serata',
-                    prefixIcon: Icon(Icons.title_rounded),
                   ),
-                  autofocus: true,
-                ),
-                const SizedBox(height: 20),
-                InkWell(
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Inserisci i dettagli della nuova serata.',
+                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _titoloController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome serata',
+                      prefixIcon: Icon(Icons.title_rounded, size: 18),
+                    ),
+                    autofocus: true,
+                    onSubmitted: (_) => _createSerata(context),
+                  ),
+                  const SizedBox(height: 16),
+                  // Date picker field
+                  InkWell(
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2030),
+                        builder: (ctx, child) => Theme(
+                          data: Theme.of(ctx).copyWith(
                             colorScheme: const ColorScheme.light(
                               primary: AppTheme.secondaryColor,
                             ),
                           ),
                           child: child!,
-                        );
-                      },
-                    );
-                    if (date != null) {
-                      setState(() => _selectedDate = date);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_rounded, color: AppTheme.textSecondary),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Data',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                DateFormat('dd MMMM yyyy', 'it_IT').format(_selectedDate),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                        const Icon(Icons.chevron_right_rounded),
-                      ],
+                      );
+                      if (date != null) {
+                        setDialogState(() => _selectedDate = date);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppTheme.borderColor),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_today_rounded,
+                              size: 18, color: AppTheme.textSecondary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Data',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppTheme.textSecondary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  DateFormat('dd MMMM yyyy', 'it_IT').format(_selectedDate),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.unfold_more_rounded,
+                              size: 16, color: AppTheme.textLight),
+                        ],
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 28),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Annulla'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () => _createSerata(context),
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text('Crea Serata'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.secondaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _createSerata(BuildContext dialogContext) {
+    if (_titoloController.text.isNotEmpty) {
+      ref.read(serateProvider.notifier).addSerata(
+            _titoloController.text,
+            _selectedDate,
+          );
+      Navigator.pop(dialogContext);
+    }
+  }
+
+  void _showDeleteDialog(dynamic serata) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: SizedBox(
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Elimina serata',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 8),
+                Text(
+                  'Vuoi eliminare "${serata.titolo}"? Questa azione non può essere annullata.',
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(ctx),
                       child: const Text('Annulla'),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
+                    const SizedBox(width: 8),
+                    FilledButton(
                       onPressed: () {
-                        if (_titoloController.text.isNotEmpty) {
-                          ref.read(serateNotifierProvider.notifier).addSerata(
-                                _titoloController.text,
-                                _selectedDate,
-                              );
-                          Navigator.pop(context);
-                        }
+                        ref.read(serateProvider.notifier).deleteSerata(serata.id!);
+                        Navigator.pop(ctx);
                       },
-                      icon: const Icon(Icons.add_rounded),
-                      label: const Text('Crea Serata'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.dangerColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      child: const Text('Elimina'),
                     ),
                   ],
                 ),
@@ -162,74 +225,53 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final serateAsync = ref.watch(serateNotifierProvider);
-    final menusAsync = ref.watch(menusNotifierProvider);
+    final serateAsync = ref.watch(serateProvider);
+    final menusAsync = ref.watch(menusProvider);
 
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha:0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+          // Page header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha:0.7)],
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Serate',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.event_rounded, color: Colors.white, size: 32),
+                    SizedBox(height: 2),
+                    Text(
+                      'Gestisci le serate organizzate',
+                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 20),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Serate',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Gestisci tutte le serate organizzate',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ElevatedButton.icon(
+                const Spacer(),
+                FilledButton.icon(
                   onPressed: _showAddSerataDialog,
-                  icon: const Icon(Icons.add_rounded),
+                  icon: const Icon(Icons.add_rounded, size: 16),
                   label: const Text('Nuova Serata'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.secondaryColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
             ),
           ),
-          
+          const Divider(height: 1, color: AppTheme.borderColor),
+
           // Content
           Expanded(
             child: serateAsync.when(
@@ -240,41 +282,41 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            shape: BoxShape.circle,
+                            color: AppTheme.backgroundColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.borderColor),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.event_busy_rounded,
-                            size: 80,
-                            color: Colors.grey.shade400,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Nessuna serata presente',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Crea la prima serata per iniziare',
-                          style: TextStyle(
-                            fontSize: 16,
+                            size: 40,
                             color: AppTheme.textLight,
                           ),
                         ),
-                        const SizedBox(height: 32),
-                        ElevatedButton.icon(
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Nessuna serata',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Crea la prima serata per iniziare.',
+                          style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
                           onPressed: _showAddSerataDialog,
-                          icon: const Icon(Icons.add_rounded, size: 24),
-                          label: const Text('Crea Prima Serata'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                          icon: const Icon(Icons.add_rounded, size: 16),
+                          label: const Text('Nuova Serata'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.secondaryColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
@@ -282,56 +324,73 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
                   );
                 }
 
-                return ListView.builder(
+                return Padding(
                   padding: const EdgeInsets.all(32),
-                  itemCount: serate.length,
-                  itemBuilder: (context, index) {
-                    final serata = serate[index];
-                    return _SerataCard(
-                      serata: serata,
-                      index: index,
-                      menusAsync: menusAsync,
-                      onDelete: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            title: const Text('Conferma eliminazione'),
-                            content: Text('Vuoi eliminare "${serata.titolo}"?\n\nQuesta azione non può essere annullata.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Annulla'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  ref.read(serateNotifierProvider.notifier).deleteSerata(serata.id!);
-                                  Navigator.pop(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.dangerColor,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppTheme.borderColor),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Column(
+                        children: [
+                          // Table header
+                          Container(
+                            color: AppTheme.backgroundColor,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
+                            child: const Row(
+                              children: [
+                                SizedBox(
+                                  width: 40,
+                                  child: Text('N°', style: _headerStyle),
                                 ),
-                                child: const Text('Elimina'),
-                              ),
-                            ],
+                                SizedBox(width: 16),
+                                Expanded(
+                                  flex: 3,
+                                  child: Text('Nome', style: _headerStyle),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text('Data', style: _headerStyle),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text('Menù', style: _headerStyle),
+                                ),
+                                SizedBox(width: 80),
+                              ],
+                            ),
                           ),
-                        );
-                      },
-                      onTap: () => context.go('/serata/${serata.id}'),
-                    );
-                  },
+                          const Divider(height: 1, color: AppTheme.borderColor),
+                          Expanded(
+                            child: ListView.separated(
+                              itemCount: serate.length,
+                              separatorBuilder: (_, _) =>
+                                  const Divider(height: 1, color: AppTheme.borderColor),
+                              itemBuilder: (ctx, i) {
+                                final serata = serate[i];
+                                return _SerataRow(
+                                  serata: serata,
+                                  index: i + 1,
+                                  menusAsync: menusAsync,
+                                  onTap: () => context.go('/serata/${serata.id}'),
+                                  onDelete: () => _showDeleteDialog(serata),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 64, color: AppTheme.dangerColor),
-                    const SizedBox(height: 16),
-                    Text('Errore: $error', style: const TextStyle(color: AppTheme.dangerColor)),
-                  ],
-                ),
+              error: (e, _) => Center(
+                child: Text('Errore: $e',
+                    style: const TextStyle(color: AppTheme.dangerColor)),
               ),
             ),
           ),
@@ -339,165 +398,159 @@ class _SerateListScreenState extends ConsumerState<SerateListScreen> {
       ),
     );
   }
+
+  static const _headerStyle = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textSecondary,
+    letterSpacing: 0.5,
+  );
 }
 
-class _SerataCard extends StatefulWidget {
+class _SerataRow extends StatefulWidget {
   final dynamic serata;
   final int index;
   final AsyncValue menusAsync;
-  final VoidCallback onDelete;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
-  const _SerataCard({
+  const _SerataRow({
     required this.serata,
     required this.index,
     required this.menusAsync,
-    required this.onDelete,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
-  State<_SerataCard> createState() => _SerataCardState();
+  State<_SerataRow> createState() => _SerataRowState();
 }
 
-class _SerataCardState extends State<_SerataCard> {
-  bool isHovered = false;
+class _SerataRowState extends State<_SerataRow> {
+  bool _hover = false;
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => isHovered = true),
-      onExit: (_) => setState(() => isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(isHovered ? 4 : 0, 0, 0),
-        margin: const EdgeInsets.only(bottom: 16),
-        child: Card(
-          elevation: isHovered ? 6 : 2,
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha:0.7)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${widget.index + 1}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          color: _hover ? AppTheme.backgroundColor : Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 40,
+                child: Text(
+                  '${widget.index}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.serata.titolo,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            const Icon(Icons.calendar_today_rounded, size: 14, color: AppTheme.textSecondary),
-                            const SizedBox(width: 6),
-                            Text(
-                              DateFormat('dd MMMM yyyy', 'it_IT').format(widget.serata.data),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            if (widget.serata.menuId != null)
-                              widget.menusAsync.when(
-                                data: (menus) {
-                                  final menuList = menus.where((m) => m.id == widget.serata.menuId).toList();
-                                  final menu = menuList.isNotEmpty ? menuList.first : null;
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.successColor.withValues(alpha:0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.restaurant_menu_rounded, size: 14, color: AppTheme.successColor),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          menu?.nome ?? 'Menù non trovato',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppTheme.successColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                                loading: () => const SizedBox.shrink(),
-                                error: (_, __) => const SizedBox.shrink(),
-                              )
-                            else
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.warningColor.withValues(alpha:0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.warning_rounded, size: 14, color: AppTheme.warningColor),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Nessun menù',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.warningColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded),
-                    color: AppTheme.dangerColor,
-                    tooltip: 'Elimina',
-                    onPressed: widget.onDelete,
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.chevron_right_rounded, color: AppTheme.textSecondary),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  widget.serata.titolo,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  DateFormat('dd MMM yyyy', 'it_IT').format(widget.serata.data),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: widget.serata.menuId != null
+                    ? widget.menusAsync.when(
+                        data: (menus) {
+                          final menuList = (menus as List)
+                              .where((m) => m.id == widget.serata.menuId)
+                              .toList();
+                          final menu = menuList.isNotEmpty ? menuList.first : null;
+                          return menu != null
+                              ? _Badge(
+                                  label: menu.nome,
+                                  color: AppTheme.successColor,
+                                )
+                              : const _Badge(
+                                  label: 'Menù non trovato',
+                                  color: AppTheme.warningColor,
+                                );
+                        },
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
+                      )
+                    : const _Badge(
+                        label: 'Nessun menù',
+                        color: AppTheme.textLight,
+                      ),
+              ),
+              SizedBox(
+                width: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      color: AppTheme.dangerColor,
+                      tooltip: 'Elimina',
+                      onPressed: widget.onDelete,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: AppTheme.textLight,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Badge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color == AppTheme.textLight ? AppTheme.textSecondary : color,
         ),
       ),
     );

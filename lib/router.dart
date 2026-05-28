@@ -29,6 +29,28 @@ final router = GoRouter(
           builder: (context, state) => const SerateListScreen(),
         ),
         GoRoute(
+          path: '/serata/:id',
+          builder: (context, state) {
+            final id = int.parse(state.pathParameters['id']!);
+            return SerataDetailScreen(serataId: id);
+          },
+        ),
+        GoRoute(
+          path: '/ordine/:serataId/:ordineId',
+          builder: (context, state) {
+            final serataId = int.parse(state.pathParameters['serataId']!);
+            final ordineId = int.parse(state.pathParameters['ordineId']!);
+            return OrdineScreen(serataId: serataId, ordineId: ordineId);
+          },
+        ),
+        GoRoute(
+          path: '/resoconto/:serataId',
+          builder: (context, state) {
+            final serataId = int.parse(state.pathParameters['serataId']!);
+            return ResocontoScreen(serataId: serataId);
+          },
+        ),
+        GoRoute(
           path: '/menu/new',
           builder: (context, state) => const MenuEditorScreen(),
         ),
@@ -44,29 +66,6 @@ final router = GoRouter(
           builder: (context, state) => const SettingsScreen(),
         ),
       ],
-    ),
-    // Routes without sidebar
-    GoRoute(
-      path: '/serata/:id',
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return SerataDetailScreen(serataId: id);
-      },
-    ),
-    GoRoute(
-      path: '/ordine/:serataId/:ordineId',
-      builder: (context, state) {
-        final serataId = int.parse(state.pathParameters['serataId']!);
-        final ordineId = int.parse(state.pathParameters['ordineId']!);
-        return OrdineScreen(serataId: serataId, ordineId: ordineId);
-      },
-    ),
-    GoRoute(
-      path: '/resoconto/:serataId',
-      builder: (context, state) {
-        final serataId = int.parse(state.pathParameters['serataId']!);
-        return ResocontoScreen(serataId: serataId);
-      },
     ),
   ],
 );

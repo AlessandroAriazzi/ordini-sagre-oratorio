@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/menu_provider.dart';
+import '../theme.dart';
 
 class MenuEditorScreen extends ConsumerStatefulWidget {
   final int? menuId;
@@ -40,90 +41,149 @@ class _MenuEditorScreenState extends ConsumerState<MenuEditorScreen> {
     return showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            width: 500,
-            padding: const EdgeInsets.all(24),
+        builder: (context, setDialogState) => Dialog(
+          child: SizedBox(
+            width: 480,
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Nuovo Prodotto',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Inserisci i dettagli del nuovo prodotto.',
+                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _nomeProdottoController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome prodotto',
+                      prefixIcon: Icon(Icons.fastfood_rounded, size: 18),
+                    ),
+                    autofocus: true,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _prezzoProdottoController,
+                          decoration: const InputDecoration(
+                            labelText: 'Prezzo',
+                            prefixIcon: Icon(Icons.euro_rounded, size: 18),
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          controller: _quantitaProdottoController,
+                          decoration: const InputDecoration(
+                            labelText: 'Quantità',
+                            prefixIcon: Icon(Icons.inventory_2_rounded, size: 18),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: _categoriaSelezionata,
+                    decoration: const InputDecoration(
+                      labelText: 'Categoria',
+                      prefixIcon: Icon(Icons.category_rounded, size: 18),
+                    ),
+                    items: _categorie.map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
+                    onChanged: (value) => setDialogState(() => _categoriaSelezionata = value ?? 'Primo'),
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Annulla'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () {
+                          if (_nomeProdottoController.text.isNotEmpty && _prezzoProdottoController.text.isNotEmpty) {
+                            final prezzo = double.tryParse(_prezzoProdottoController.text) ?? 0.0;
+                            final quantita = int.tryParse(_quantitaProdottoController.text) ?? 0;
+                            ref.read(menusProvider.notifier).addProdotto(
+                              menuId,
+                              _nomeProdottoController.text,
+                              prezzo,
+                              _categoriaSelezionata,
+                              quantita,
+                            );
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text('Aggiungi'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.secondaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showEditQuantitaDialog(int prodottoId, String nomeProdotto, int quantitaAttuale) async {
+    final controller = TextEditingController(text: quantitaAttuale.toString());
+
+    return showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: SizedBox(
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.all(28),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(Icons.add_shopping_cart, color: Colors.blue.shade700, size: 28),
-                    ),
-                    const SizedBox(width: 16),
-                    const Text(
-                      'Nuovo Prodotto',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                const Text(
+                  'Modifica quantità',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  nomeProdotto,
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 24),
                 TextField(
-                  controller: _nomeProdottoController,
-                  decoration: InputDecoration(
-                    labelText: 'Nome prodotto',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.fastfood),
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Nuova quantità',
+                    prefixIcon: Icon(Icons.format_list_numbered_rounded, size: 18),
                   ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  autofocus: true,
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _prezzoProdottoController,
-                        decoration: InputDecoration(
-                          labelText: 'Prezzo',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          prefixIcon: const Icon(Icons.euro),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: _quantitaProdottoController,
-                        decoration: InputDecoration(
-                          labelText: 'Quantità',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          prefixIcon: const Icon(Icons.inventory),
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _categoriaSelezionata,
-                  decoration: InputDecoration(
-                    labelText: 'Categoria',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.category),
-                  ),
-                  items: _categorie.map((cat) => DropdownMenuItem(
-                    value: cat,
-                    child: Text(cat),
-                  )).toList(),
-                  onChanged: (value) {
-                    setState(() => _categoriaSelezionata = value ?? 'Primo');
-                  },
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -131,28 +191,19 @@ class _MenuEditorScreenState extends ConsumerState<MenuEditorScreen> {
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Annulla'),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
                       onPressed: () {
-                        if (_nomeProdottoController.text.isNotEmpty &&
-                            _prezzoProdottoController.text.isNotEmpty) {
-                          final prezzo = double.tryParse(_prezzoProdottoController.text) ?? 0.0;
-                          final quantita = int.tryParse(_quantitaProdottoController.text) ?? 0;
-                          ref.read(menusNotifierProvider.notifier).addProdotto(
-                            menuId,
-                            _nomeProdottoController.text,
-                            prezzo,
-                            _categoriaSelezionata,
-                            quantita,
-                          );
-                          Navigator.pop(context);
-                        }
+                        final nuovaQuantita = int.tryParse(controller.text) ?? 0;
+                        ref.read(menusProvider.notifier).updateProdottoQuantita(prodottoId, nuovaQuantita);
+                        Navigator.pop(context);
                       },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Aggiungi'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      icon: const Icon(Icons.check_rounded, size: 16),
+                      label: const Text('Salva'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.secondaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -165,161 +216,176 @@ class _MenuEditorScreenState extends ConsumerState<MenuEditorScreen> {
     );
   }
 
-  Future<void> _showEditQuantitaDialog(int prodottoId, String nomeProdotto, int quantitaAttuale) async {
-    final controller = TextEditingController(text: quantitaAttuale.toString());
-    
-    return showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.inventory_2, color: Colors.orange.shade700, size: 28),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Modifica Quantità',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          nomeProdotto,
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  labelText: 'Nuova quantità',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.format_list_numbered),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                autofocus: true,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Annulla'),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      final nuovaQuantita = int.tryParse(controller.text) ?? 0;
-                      ref.read(menusNotifierProvider.notifier).updateProdottoQuantita(
-                        prodottoId,
-                        nuovaQuantita,
-                      );
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.check),
-                    label: const Text('Salva'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _showCreateMenuDialog() async {
     _nomeMenuController.clear();
 
     return showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.restaurant_menu, color: Colors.green.shade700, size: 28),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text(
-                    'Nuovo Menù',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _nomeMenuController,
-                decoration: InputDecoration(
-                  labelText: 'Nome menù',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.title),
+        child: SizedBox(
+          width: 440,
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Nuovo Menù',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                 ),
-                autofocus: true,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Annulla'),
+                const SizedBox(height: 4),
+                const Text(
+                  'Inserisci il nome del nuovo menù.',
+                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: _nomeMenuController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome menù',
+                    prefixIcon: Icon(Icons.restaurant_menu_rounded, size: 18),
                   ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      if (_nomeMenuController.text.isNotEmpty) {
-                        ref.read(menusNotifierProvider.notifier).addMenu(_nomeMenuController.text);
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Crea'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  autofocus: true,
+                  onSubmitted: (_) {
+                    if (_nomeMenuController.text.isNotEmpty) {
+                      ref.read(menusProvider.notifier).addMenu(_nomeMenuController.text);
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Annulla'),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: () {
+                        if (_nomeMenuController.text.isNotEmpty) {
+                          ref.read(menusProvider.notifier).addMenu(_nomeMenuController.text);
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: const Text('Crea Menù'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.secondaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteMenuDialog(BuildContext context, dynamic menu) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: SizedBox(
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Elimina menù',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Vuoi eliminare "${menu.nome}"? Questa azione non può essere annullata.',
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Annulla'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () {
+                        ref.read(menusProvider.notifier).deleteMenu(menu.id!);
+                        Navigator.pop(ctx);
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.dangerColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      child: const Text('Elimina'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteProdottoDialog(BuildContext context, dynamic prodotto) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: SizedBox(
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Elimina prodotto',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Vuoi eliminare "${prodotto.nome}"?',
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Annulla'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () {
+                        ref.read(menusProvider.notifier).deleteProdotto(prodotto.id!);
+                        Navigator.pop(ctx);
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.dangerColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      child: const Text('Elimina'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -328,18 +394,12 @@ class _MenuEditorScreenState extends ConsumerState<MenuEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final menusAsync = ref.watch(menusNotifierProvider);
+    final menusAsync = ref.watch(menusProvider);
 
     return Scaffold(
-      appBar: widget.menuId != null ? AppBar(
-        title: const Text('Modifica Menù'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/menu/new'),
-        ),
-      ) : null,
       body: menusAsync.when(
         data: (menus) {
+          // Edit view
           if (widget.menuId != null) {
             final menuList = menus.where((m) => m.id == widget.menuId).toList();
             final menu = menuList.isNotEmpty ? menuList.first : null;
@@ -347,365 +407,531 @@ class _MenuEditorScreenState extends ConsumerState<MenuEditorScreen> {
               return const Center(child: Text('Menù non trovato'));
             }
 
-            // Raggruppa prodotti per categoria
             final prodottiPerCategoria = <String, List>{};
             for (final prodotto in menu.prodotti) {
               prodottiPerCategoria.putIfAbsent(prodotto.categoria, () => []).add(prodotto);
             }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(Icons.restaurant_menu, size: 40, color: Colors.blue.shade700),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  menu.nome,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${menu.prodotti.length} prodotti',
-                                  style: const TextStyle(color: Colors.grey, fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () => _showAddProdottoDialog(menu.id!),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Nuovo Prodotto'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+            return Column(
+              children: [
+                // Breadcrumb header
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(bottom: BorderSide(color: AppTheme.borderColor)),
                   ),
-                  const SizedBox(height: 32),
-                  if (menu.prodotti.isEmpty)
-                    Card(
-                      elevation: 0,
-                      color: Colors.grey.shade100,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      child: const Padding(
-                        padding: EdgeInsets.all(48),
-                        child: Center(
-                          child: Column(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  child: Row(
+                    children: [
+                      InkWell(
+                        onTap: () => context.go('/menu/new'),
+                        borderRadius: BorderRadius.circular(6),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.inventory_2, size: 64, color: Colors.grey),
-                              SizedBox(height: 16),
-                              Text(
-                                'Nessun prodotto nel menù',
-                                style: TextStyle(fontSize: 18, color: Colors.grey),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Aggiungi il primo prodotto per iniziare',
-                                style: TextStyle(color: Colors.grey),
-                              ),
+                              Icon(Icons.chevron_left_rounded, size: 16, color: AppTheme.textSecondary),
+                              SizedBox(width: 4),
+                              Text('Menù', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
                             ],
                           ),
                         ),
                       ),
-                    )
-                  else
-                    ..._categorie.where((cat) => prodottiPerCategoria.containsKey(cat)).map((categoria) {
-                      final prodotti = prodottiPerCategoria[categoria]!;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Row(
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6),
+                        child: Text('/', style: TextStyle(color: AppTheme.textLight, fontSize: 13)),
+                      ),
+                      Text(
+                        menu.nome,
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      ),
+                      const Spacer(),
+                      FilledButton.icon(
+                        onPressed: () => _showAddProdottoDialog(menu.id!),
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text('Nuovo Prodotto'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.secondaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Products content
+                Expanded(
+                  child: menu.prodotti.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.backgroundColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppTheme.borderColor),
+                                ),
+                                child: const Icon(Icons.inventory_2_rounded, size: 36, color: AppTheme.textLight),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Nessun prodotto nel menù',
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Aggiungi il primo prodotto per iniziare.',
+                                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                              ),
+                              const SizedBox(height: 20),
+                              FilledButton.icon(
+                                onPressed: () => _showAddProdottoDialog(menu.id!),
+                                icon: const Icon(Icons.add_rounded, size: 16),
+                                label: const Text('Nuovo Prodotto'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppTheme.secondaryColor,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _categorie.where((cat) => prodottiPerCategoria.containsKey(cat)).map((categoria) {
+                              final prodotti = prodottiPerCategoria[categoria]!;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          categoria.toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.8,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.secondaryColor.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            '${prodotti.length}',
+                                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.secondaryColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppTheme.borderColor),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            color: AppTheme.backgroundColor,
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                            child: const Row(
+                                              children: [
+                                                Expanded(flex: 3, child: Text('Nome', style: _headerStyle)),
+                                                SizedBox(width: 120, child: Text('Prezzo', style: _headerStyle, textAlign: TextAlign.right)),
+                                                SizedBox(width: 120, child: Text('Disponibili', style: _headerStyle, textAlign: TextAlign.center)),
+                                                SizedBox(width: 100, child: Text('Stato', style: _headerStyle, textAlign: TextAlign.center)),
+                                                SizedBox(width: 80),
+                                              ],
+                                            ),
+                                          ),
+                                          const Divider(height: 1, color: AppTheme.borderColor),
+                                          ...prodotti.asMap().entries.map<Widget>((e) {
+                                            final i = e.key;
+                                            final prodotto = e.value;
+                                            return Column(
+                                              children: [
+                                                if (i > 0) const Divider(height: 1, color: AppTheme.borderColor),
+                                                _ProdottoRow(
+                                                  prodotto: prodotto,
+                                                  onEditQuantita: () => _showEditQuantitaDialog(prodotto.id!, prodotto.nome, prodotto.quantita),
+                                                  onDelete: () => _showDeleteProdottoDialog(context, prodotto),
+                                                ),
+                                              ],
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                ),
+              ],
+            );
+          }
+
+          // List view
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Page header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                child: Row(
+                  children: [
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Menù',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppTheme.textPrimary, letterSpacing: -0.3),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Gestisci i menù disponibili',
+                          style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    FilledButton.icon(
+                      onPressed: _showCreateMenuDialog,
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: const Text('Nuovo Menù'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.secondaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: AppTheme.borderColor),
+
+              Expanded(
+                child: menus.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: AppTheme.backgroundColor,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppTheme.borderColor),
+                              ),
+                              child: const Icon(Icons.restaurant_menu_rounded, size: 40, color: AppTheme.textLight),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'Nessun menù',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Crea il primo menù per iniziare.',
+                              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                            ),
+                            const SizedBox(height: 20),
+                            FilledButton.icon(
+                              onPressed: _showCreateMenuDialog,
+                              icon: const Icon(Icons.add_rounded, size: 16),
+                              label: const Text('Nuovo Menù'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppTheme.secondaryColor,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppTheme.borderColor),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Column(
                               children: [
-                                Icon(_getCategoriaIcon(categoria), color: Colors.blue.shade700),
-                                const SizedBox(width: 12),
-                                Text(
-                                  categoria,
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                                // Table header
+                                Container(
+                                  color: AppTheme.backgroundColor,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  child: const Row(
+                                    children: [
+                                      SizedBox(width: 40, child: Text('N°', style: _headerStyle)),
+                                      SizedBox(width: 16),
+                                      Expanded(flex: 3, child: Text('Nome', style: _headerStyle)),
+                                      SizedBox(width: 160, child: Text('N° Prodotti', style: _headerStyle, textAlign: TextAlign.center)),
+                                      SizedBox(width: 80),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '${prodotti.length} prodotti',
-                                    style: TextStyle(
-                                      color: Colors.blue.shade700,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                const Divider(height: 1, color: AppTheme.borderColor),
+                                Expanded(
+                                  child: ListView.separated(
+                                    itemCount: menus.length,
+                                    separatorBuilder: (_, _) => const Divider(height: 1, color: AppTheme.borderColor),
+                                    itemBuilder: (ctx, i) {
+                                      final menu = menus[i];
+                                      return _MenuRow(
+                                        menu: menu,
+                                        index: i + 1,
+                                        onTap: () => context.go('/menu/${menu.id}'),
+                                        onDelete: () => _showDeleteMenuDialog(context, menu),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          ...prodotti.map((prodotto) => Card(
-                            elevation: 1,
-                            margin: const EdgeInsets.only(bottom: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: prodotto.isEsaurito ? Colors.red.shade50 : Colors.green.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  prodotto.isEsaurito ? Icons.remove_shopping_cart : Icons.shopping_cart,
-                                  color: prodotto.isEsaurito ? Colors.red.shade700 : Colors.green.shade700,
-                                ),
-                              ),
-                              title: Text(
-                                prodotto.nome,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              subtitle: Row(
-                                children: [
-                                  Text(
-                                    '€ ${prodotto.prezzo.toStringAsFixed(2)}',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: prodotto.isEsaurito ? Colors.red.shade50 : Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      prodotto.isEsaurito 
-                                        ? 'ESAURITO' 
-                                        : 'Disponibili: ${prodotto.quantita}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: prodotto.isEsaurito ? Colors.red.shade700 : Colors.blue.shade700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined),
-                                    tooltip: 'Modifica quantità',
-                                    onPressed: () => _showEditQuantitaDialog(
-                                      prodotto.id!,
-                                      prodotto.nome,
-                                      prodotto.quantita,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                    tooltip: 'Elimina',
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                          title: const Text('Conferma eliminazione'),
-                                          content: Text('Vuoi eliminare "${prodotto.nome}"?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context),
-                                              child: const Text('Annulla'),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                ref.read(menusNotifierProvider.notifier).deleteProdotto(prodotto.id!);
-                                                Navigator.pop(context);
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.red,
-                                                foregroundColor: Colors.white,
-                                              ),
-                                              child: const Text('Elimina'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )),
-                          const SizedBox(height: 24),
-                        ],
-                      );
-                    }),
-                ],
-              ),
-            );
-          }
-
-          // Vista lista menù
-          if (menus.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.restaurant_menu, size: 80, color: Colors.grey.shade400),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Nessun menù presente',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Crea il primo menù per iniziare',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    onPressed: _showCreateMenuDialog,
-                    icon: const Icon(Icons.add, size: 28),
-                    label: const Text('Crea primo menù', style: TextStyle(fontSize: 18)),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(24),
-            itemCount: menus.length,
-            itemBuilder: (context, index) {
-              final menu = menus[index];
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(20),
-                  leading: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.restaurant_menu, color: Colors.blue.shade700, size: 32),
-                  ),
-                  title: Text(
-                    menu.nome,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '${menu.prodotti.length} prodotti',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                        tooltip: 'Elimina menù',
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              title: const Text('Conferma eliminazione'),
-                              content: Text('Vuoi eliminare il menù "${menu.nome}"?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Annulla'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    ref.read(menusNotifierProvider.notifier).deleteMenu(menu.id!);
-                                    Navigator.pop(context);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('Elimina'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.chevron_right),
-                    ],
-                  ),
-                  onTap: () => context.go('/menu/${menu.id}'),
-                ),
-              );
-            },
+              ),
+            ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Errore: $error')),
       ),
-      floatingActionButton: widget.menuId == null
-          ? FloatingActionButton.extended(
-              onPressed: _showCreateMenuDialog,
-              icon: const Icon(Icons.add),
-              label: const Text('Nuovo Menù'),
-            )
-          : null,
     );
   }
 
-  IconData _getCategoriaIcon(String categoria) {
-    switch (categoria) {
-      case 'Primo':
-        return Icons.ramen_dining;
-      case 'Secondo':
-        return Icons.set_meal;
-      case 'Contorno':
-        return Icons.lunch_dining;
-      case 'Dolce':
-        return Icons.cake;
-      case 'Bevanda':
-        return Icons.local_drink;
-      default:
-        return Icons.fastfood;
-    }
+  static const _headerStyle = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textSecondary,
+    letterSpacing: 0.5,
+  );
+}
+
+class _MenuRow extends StatefulWidget {
+  final dynamic menu;
+  final int index;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _MenuRow({
+    required this.menu,
+    required this.index,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  State<_MenuRow> createState() => _MenuRowState();
+}
+
+class _MenuRowState extends State<_MenuRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          color: _hover ? AppTheme.backgroundColor : Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 40,
+                child: Text(
+                  '${widget.index}',
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  widget.menu.nome,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
+                ),
+              ),
+              SizedBox(
+                width: 160,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppTheme.secondaryColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: AppTheme.secondaryColor.withValues(alpha: 0.2)),
+                    ),
+                    child: Text(
+                      '${widget.menu.prodotti.length} prodotti',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.secondaryColor),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      color: AppTheme.dangerColor,
+                      tooltip: 'Elimina',
+                      onPressed: widget.onDelete,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const Icon(Icons.chevron_right_rounded, size: 18, color: AppTheme.textLight),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProdottoRow extends StatefulWidget {
+  final dynamic prodotto;
+  final VoidCallback onEditQuantita;
+  final VoidCallback onDelete;
+
+  const _ProdottoRow({
+    required this.prodotto,
+    required this.onEditQuantita,
+    required this.onDelete,
+  });
+
+  @override
+  State<_ProdottoRow> createState() => _ProdottoRowState();
+}
+
+class _ProdottoRowState extends State<_ProdottoRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEsaurito = widget.prodotto.isEsaurito;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        color: _hover ? AppTheme.backgroundColor : Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Text(
+                widget.prodotto.nome,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isEsaurito ? AppTheme.textLight : AppTheme.textPrimary,
+                  decoration: isEsaurito ? TextDecoration.lineThrough : null,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 120,
+              child: Text(
+                '€${widget.prodotto.prezzo.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                textAlign: TextAlign.right,
+              ),
+            ),
+            SizedBox(
+              width: 120,
+              child: Text(
+                isEsaurito ? '—' : '${widget.prodotto.quantita}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: widget.prodotto.quantita < 10 && !isEsaurito ? AppTheme.warningColor : AppTheme.textSecondary,
+                  fontWeight: widget.prodotto.quantita < 10 && !isEsaurito ? FontWeight.w600 : FontWeight.normal,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(
+              width: 100,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: isEsaurito ? AppTheme.dangerColor.withValues(alpha: 0.08) : AppTheme.successColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: isEsaurito ? AppTheme.dangerColor.withValues(alpha: 0.2) : AppTheme.successColor.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    isEsaurito ? 'Esaurito' : 'Disponibile',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: isEsaurito ? AppTheme.dangerColor : AppTheme.successColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 80,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    color: AppTheme.textSecondary,
+                    tooltip: 'Modifica quantità',
+                    onPressed: widget.onEditQuantita,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded, size: 16),
+                    color: AppTheme.dangerColor,
+                    tooltip: 'Elimina',
+                    onPressed: widget.onDelete,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

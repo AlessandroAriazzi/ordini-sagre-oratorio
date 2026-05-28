@@ -11,27 +11,43 @@ class $SerateTable extends Serate with TableInfo<$SerateTable, SerataData> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _titoloMeta = const VerificationMeta('titolo');
   @override
   late final GeneratedColumn<String> titolo = GeneratedColumn<String>(
-      'titolo', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'titolo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
   late final GeneratedColumn<DateTime> data = GeneratedColumn<DateTime>(
-      'data', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _menuIdMeta = const VerificationMeta('menuId');
   @override
   late final GeneratedColumn<int> menuId = GeneratedColumn<int>(
-      'menu_id', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+    'menu_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, titolo, data, menuId];
   @override
@@ -40,28 +56,36 @@ class $SerateTable extends Serate with TableInfo<$SerateTable, SerataData> {
   String get actualTableName => $name;
   static const String $name = 'serate';
   @override
-  VerificationContext validateIntegrity(Insertable<SerataData> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<SerataData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('titolo')) {
-      context.handle(_titoloMeta,
-          titolo.isAcceptableOrUnknown(data['titolo']!, _titoloMeta));
+      context.handle(
+        _titoloMeta,
+        titolo.isAcceptableOrUnknown(data['titolo']!, _titoloMeta),
+      );
     } else if (isInserting) {
       context.missing(_titoloMeta);
     }
     if (data.containsKey('data')) {
       context.handle(
-          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
     if (data.containsKey('menu_id')) {
-      context.handle(_menuIdMeta,
-          menuId.isAcceptableOrUnknown(data['menu_id']!, _menuIdMeta));
+      context.handle(
+        _menuIdMeta,
+        menuId.isAcceptableOrUnknown(data['menu_id']!, _menuIdMeta),
+      );
     }
     return context;
   }
@@ -72,14 +96,22 @@ class $SerateTable extends Serate with TableInfo<$SerateTable, SerataData> {
   SerataData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SerataData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      titolo: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}titolo'])!,
-      data: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}data'])!,
-      menuId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}menu_id']),
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      titolo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}titolo'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data'],
+      )!,
+      menuId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}menu_id'],
+      ),
     );
   }
 
@@ -94,11 +126,12 @@ class SerataData extends DataClass implements Insertable<SerataData> {
   final String titolo;
   final DateTime data;
   final int? menuId;
-  const SerataData(
-      {required this.id,
-      required this.titolo,
-      required this.data,
-      this.menuId});
+  const SerataData({
+    required this.id,
+    required this.titolo,
+    required this.data,
+    this.menuId,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -116,13 +149,16 @@ class SerataData extends DataClass implements Insertable<SerataData> {
       id: Value(id),
       titolo: Value(titolo),
       data: Value(data),
-      menuId:
-          menuId == null && nullToAbsent ? const Value.absent() : Value(menuId),
+      menuId: menuId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(menuId),
     );
   }
 
-  factory SerataData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory SerataData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SerataData(
       id: serializer.fromJson<int>(json['id']),
@@ -142,17 +178,17 @@ class SerataData extends DataClass implements Insertable<SerataData> {
     };
   }
 
-  SerataData copyWith(
-          {int? id,
-          String? titolo,
-          DateTime? data,
-          Value<int?> menuId = const Value.absent()}) =>
-      SerataData(
-        id: id ?? this.id,
-        titolo: titolo ?? this.titolo,
-        data: data ?? this.data,
-        menuId: menuId.present ? menuId.value : this.menuId,
-      );
+  SerataData copyWith({
+    int? id,
+    String? titolo,
+    DateTime? data,
+    Value<int?> menuId = const Value.absent(),
+  }) => SerataData(
+    id: id ?? this.id,
+    titolo: titolo ?? this.titolo,
+    data: data ?? this.data,
+    menuId: menuId.present ? menuId.value : this.menuId,
+  );
   SerataData copyWithCompanion(SerateCompanion data) {
     return SerataData(
       id: data.id.present ? data.id.value : this.id,
@@ -201,8 +237,8 @@ class SerateCompanion extends UpdateCompanion<SerataData> {
     required String titolo,
     required DateTime data,
     this.menuId = const Value.absent(),
-  })  : titolo = Value(titolo),
-        data = Value(data);
+  }) : titolo = Value(titolo),
+       data = Value(data);
   static Insertable<SerataData> custom({
     Expression<int>? id,
     Expression<String>? titolo,
@@ -217,11 +253,12 @@ class SerateCompanion extends UpdateCompanion<SerataData> {
     });
   }
 
-  SerateCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? titolo,
-      Value<DateTime>? data,
-      Value<int?>? menuId}) {
+  SerateCompanion copyWith({
+    Value<int>? id,
+    Value<String>? titolo,
+    Value<DateTime>? data,
+    Value<int?>? menuId,
+  }) {
     return SerateCompanion(
       id: id ?? this.id,
       titolo: titolo ?? this.titolo,
@@ -268,17 +305,25 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
   @override
   late final GeneratedColumn<String> nome = GeneratedColumn<String>(
-      'nome', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'nome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, nome];
   @override
@@ -287,8 +332,10 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
   String get actualTableName => $name;
   static const String $name = 'menus';
   @override
-  VerificationContext validateIntegrity(Insertable<MenuData> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<MenuData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -296,7 +343,9 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
     }
     if (data.containsKey('nome')) {
       context.handle(
-          _nomeMeta, nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta));
+        _nomeMeta,
+        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+      );
     } else if (isInserting) {
       context.missing(_nomeMeta);
     }
@@ -309,10 +358,14 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
   MenuData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MenuData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      nome: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      nome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome'],
+      )!,
     );
   }
 
@@ -335,14 +388,13 @@ class MenuData extends DataClass implements Insertable<MenuData> {
   }
 
   MenusCompanion toCompanion(bool nullToAbsent) {
-    return MenusCompanion(
-      id: Value(id),
-      nome: Value(nome),
-    );
+    return MenusCompanion(id: Value(id), nome: Value(nome));
   }
 
-  factory MenuData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory MenuData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MenuData(
       id: serializer.fromJson<int>(json['id']),
@@ -358,10 +410,8 @@ class MenuData extends DataClass implements Insertable<MenuData> {
     };
   }
 
-  MenuData copyWith({int? id, String? nome}) => MenuData(
-        id: id ?? this.id,
-        nome: nome ?? this.nome,
-      );
+  MenuData copyWith({int? id, String? nome}) =>
+      MenuData(id: id ?? this.id, nome: nome ?? this.nome);
   MenuData copyWithCompanion(MenusCompanion data) {
     return MenuData(
       id: data.id.present ? data.id.value : this.id,
@@ -393,10 +443,8 @@ class MenusCompanion extends UpdateCompanion<MenuData> {
     this.id = const Value.absent(),
     this.nome = const Value.absent(),
   });
-  MenusCompanion.insert({
-    this.id = const Value.absent(),
-    required String nome,
-  }) : nome = Value(nome);
+  MenusCompanion.insert({this.id = const Value.absent(), required String nome})
+    : nome = Value(nome);
   static Insertable<MenuData> custom({
     Expression<int>? id,
     Expression<String>? nome,
@@ -408,10 +456,7 @@ class MenusCompanion extends UpdateCompanion<MenuData> {
   }
 
   MenusCompanion copyWith({Value<int>? id, Value<String>? nome}) {
-    return MenusCompanion(
-      id: id ?? this.id,
-      nome: nome ?? this.nome,
-    );
+    return MenusCompanion(id: id ?? this.id, nome: nome ?? this.nome);
   }
 
   @override
@@ -445,52 +490,85 @@ class $ProdottiTable extends Prodotti
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
   @override
   late final GeneratedColumn<String> nome = GeneratedColumn<String>(
-      'nome', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'nome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _prezzoMeta = const VerificationMeta('prezzo');
   @override
   late final GeneratedColumn<double> prezzo = GeneratedColumn<double>(
-      'prezzo', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'prezzo',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _menuIdMeta = const VerificationMeta('menuId');
   @override
   late final GeneratedColumn<int> menuId = GeneratedColumn<int>(
-      'menu_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _categoriaMeta =
-      const VerificationMeta('categoria');
+    'menu_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoriaMeta = const VerificationMeta(
+    'categoria',
+  );
   @override
   late final GeneratedColumn<String> categoria = GeneratedColumn<String>(
-      'categoria', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _quantitaMeta =
-      const VerificationMeta('quantita');
+    'categoria',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantitaMeta = const VerificationMeta(
+    'quantita',
+  );
   @override
   late final GeneratedColumn<int> quantita = GeneratedColumn<int>(
-      'quantita', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'quantita',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, nome, prezzo, menuId, categoria, quantita];
+  List<GeneratedColumn> get $columns => [
+    id,
+    nome,
+    prezzo,
+    menuId,
+    categoria,
+    quantita,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'prodotti';
   @override
-  VerificationContext validateIntegrity(Insertable<ProdottoData> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<ProdottoData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -498,31 +576,41 @@ class $ProdottiTable extends Prodotti
     }
     if (data.containsKey('nome')) {
       context.handle(
-          _nomeMeta, nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta));
+        _nomeMeta,
+        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+      );
     } else if (isInserting) {
       context.missing(_nomeMeta);
     }
     if (data.containsKey('prezzo')) {
-      context.handle(_prezzoMeta,
-          prezzo.isAcceptableOrUnknown(data['prezzo']!, _prezzoMeta));
+      context.handle(
+        _prezzoMeta,
+        prezzo.isAcceptableOrUnknown(data['prezzo']!, _prezzoMeta),
+      );
     } else if (isInserting) {
       context.missing(_prezzoMeta);
     }
     if (data.containsKey('menu_id')) {
-      context.handle(_menuIdMeta,
-          menuId.isAcceptableOrUnknown(data['menu_id']!, _menuIdMeta));
+      context.handle(
+        _menuIdMeta,
+        menuId.isAcceptableOrUnknown(data['menu_id']!, _menuIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_menuIdMeta);
     }
     if (data.containsKey('categoria')) {
-      context.handle(_categoriaMeta,
-          categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta));
+      context.handle(
+        _categoriaMeta,
+        categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta),
+      );
     } else if (isInserting) {
       context.missing(_categoriaMeta);
     }
     if (data.containsKey('quantita')) {
-      context.handle(_quantitaMeta,
-          quantita.isAcceptableOrUnknown(data['quantita']!, _quantitaMeta));
+      context.handle(
+        _quantitaMeta,
+        quantita.isAcceptableOrUnknown(data['quantita']!, _quantitaMeta),
+      );
     }
     return context;
   }
@@ -533,18 +621,30 @@ class $ProdottiTable extends Prodotti
   ProdottoData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ProdottoData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      nome: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
-      prezzo: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}prezzo'])!,
-      menuId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}menu_id'])!,
-      categoria: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}categoria'])!,
-      quantita: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}quantita'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      nome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome'],
+      )!,
+      prezzo: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}prezzo'],
+      )!,
+      menuId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}menu_id'],
+      )!,
+      categoria: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}categoria'],
+      )!,
+      quantita: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantita'],
+      )!,
     );
   }
 
@@ -561,13 +661,14 @@ class ProdottoData extends DataClass implements Insertable<ProdottoData> {
   final int menuId;
   final String categoria;
   final int quantita;
-  const ProdottoData(
-      {required this.id,
-      required this.nome,
-      required this.prezzo,
-      required this.menuId,
-      required this.categoria,
-      required this.quantita});
+  const ProdottoData({
+    required this.id,
+    required this.nome,
+    required this.prezzo,
+    required this.menuId,
+    required this.categoria,
+    required this.quantita,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -591,8 +692,10 @@ class ProdottoData extends DataClass implements Insertable<ProdottoData> {
     );
   }
 
-  factory ProdottoData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ProdottoData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ProdottoData(
       id: serializer.fromJson<int>(json['id']),
@@ -616,21 +719,21 @@ class ProdottoData extends DataClass implements Insertable<ProdottoData> {
     };
   }
 
-  ProdottoData copyWith(
-          {int? id,
-          String? nome,
-          double? prezzo,
-          int? menuId,
-          String? categoria,
-          int? quantita}) =>
-      ProdottoData(
-        id: id ?? this.id,
-        nome: nome ?? this.nome,
-        prezzo: prezzo ?? this.prezzo,
-        menuId: menuId ?? this.menuId,
-        categoria: categoria ?? this.categoria,
-        quantita: quantita ?? this.quantita,
-      );
+  ProdottoData copyWith({
+    int? id,
+    String? nome,
+    double? prezzo,
+    int? menuId,
+    String? categoria,
+    int? quantita,
+  }) => ProdottoData(
+    id: id ?? this.id,
+    nome: nome ?? this.nome,
+    prezzo: prezzo ?? this.prezzo,
+    menuId: menuId ?? this.menuId,
+    categoria: categoria ?? this.categoria,
+    quantita: quantita ?? this.quantita,
+  );
   ProdottoData copyWithCompanion(ProdottiCompanion data) {
     return ProdottoData(
       id: data.id.present ? data.id.value : this.id,
@@ -692,10 +795,10 @@ class ProdottiCompanion extends UpdateCompanion<ProdottoData> {
     required int menuId,
     required String categoria,
     this.quantita = const Value.absent(),
-  })  : nome = Value(nome),
-        prezzo = Value(prezzo),
-        menuId = Value(menuId),
-        categoria = Value(categoria);
+  }) : nome = Value(nome),
+       prezzo = Value(prezzo),
+       menuId = Value(menuId),
+       categoria = Value(categoria);
   static Insertable<ProdottoData> custom({
     Expression<int>? id,
     Expression<String>? nome,
@@ -714,13 +817,14 @@ class ProdottiCompanion extends UpdateCompanion<ProdottoData> {
     });
   }
 
-  ProdottiCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? nome,
-      Value<double>? prezzo,
-      Value<int>? menuId,
-      Value<String>? categoria,
-      Value<int>? quantita}) {
+  ProdottiCompanion copyWith({
+    Value<int>? id,
+    Value<String>? nome,
+    Value<double>? prezzo,
+    Value<int>? menuId,
+    Value<String>? categoria,
+    Value<int>? quantita,
+  }) {
     return ProdottiCompanion(
       id: id ?? this.id,
       nome: nome ?? this.nome,
@@ -777,29 +881,47 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _serataIdMeta =
-      const VerificationMeta('serataId');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _serataIdMeta = const VerificationMeta(
+    'serataId',
+  );
   @override
   late final GeneratedColumn<int> serataId = GeneratedColumn<int>(
-      'serata_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _dataOraMeta =
-      const VerificationMeta('dataOra');
+    'serata_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataOraMeta = const VerificationMeta(
+    'dataOra',
+  );
   @override
   late final GeneratedColumn<DateTime> dataOra = GeneratedColumn<DateTime>(
-      'data_ora', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+    'data_ora',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _totaleMeta = const VerificationMeta('totale');
   @override
   late final GeneratedColumn<double> totale = GeneratedColumn<double>(
-      'totale', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
+    'totale',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [id, serataId, dataOra, totale];
   @override
@@ -808,28 +930,36 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
   String get actualTableName => $name;
   static const String $name = 'ordini';
   @override
-  VerificationContext validateIntegrity(Insertable<OrdineData> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<OrdineData> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('serata_id')) {
-      context.handle(_serataIdMeta,
-          serataId.isAcceptableOrUnknown(data['serata_id']!, _serataIdMeta));
+      context.handle(
+        _serataIdMeta,
+        serataId.isAcceptableOrUnknown(data['serata_id']!, _serataIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_serataIdMeta);
     }
     if (data.containsKey('data_ora')) {
-      context.handle(_dataOraMeta,
-          dataOra.isAcceptableOrUnknown(data['data_ora']!, _dataOraMeta));
+      context.handle(
+        _dataOraMeta,
+        dataOra.isAcceptableOrUnknown(data['data_ora']!, _dataOraMeta),
+      );
     } else if (isInserting) {
       context.missing(_dataOraMeta);
     }
     if (data.containsKey('totale')) {
-      context.handle(_totaleMeta,
-          totale.isAcceptableOrUnknown(data['totale']!, _totaleMeta));
+      context.handle(
+        _totaleMeta,
+        totale.isAcceptableOrUnknown(data['totale']!, _totaleMeta),
+      );
     } else if (isInserting) {
       context.missing(_totaleMeta);
     }
@@ -842,14 +972,22 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
   OrdineData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return OrdineData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      serataId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}serata_id'])!,
-      dataOra: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}data_ora'])!,
-      totale: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}totale'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      serataId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}serata_id'],
+      )!,
+      dataOra: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data_ora'],
+      )!,
+      totale: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}totale'],
+      )!,
     );
   }
 
@@ -864,11 +1002,12 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
   final int serataId;
   final DateTime dataOra;
   final double totale;
-  const OrdineData(
-      {required this.id,
-      required this.serataId,
-      required this.dataOra,
-      required this.totale});
+  const OrdineData({
+    required this.id,
+    required this.serataId,
+    required this.dataOra,
+    required this.totale,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -888,8 +1027,10 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     );
   }
 
-  factory OrdineData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory OrdineData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return OrdineData(
       id: serializer.fromJson<int>(json['id']),
@@ -909,14 +1050,17 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     };
   }
 
-  OrdineData copyWith(
-          {int? id, int? serataId, DateTime? dataOra, double? totale}) =>
-      OrdineData(
-        id: id ?? this.id,
-        serataId: serataId ?? this.serataId,
-        dataOra: dataOra ?? this.dataOra,
-        totale: totale ?? this.totale,
-      );
+  OrdineData copyWith({
+    int? id,
+    int? serataId,
+    DateTime? dataOra,
+    double? totale,
+  }) => OrdineData(
+    id: id ?? this.id,
+    serataId: serataId ?? this.serataId,
+    dataOra: dataOra ?? this.dataOra,
+    totale: totale ?? this.totale,
+  );
   OrdineData copyWithCompanion(OrdiniCompanion data) {
     return OrdineData(
       id: data.id.present ? data.id.value : this.id,
@@ -965,9 +1109,9 @@ class OrdiniCompanion extends UpdateCompanion<OrdineData> {
     required int serataId,
     required DateTime dataOra,
     required double totale,
-  })  : serataId = Value(serataId),
-        dataOra = Value(dataOra),
-        totale = Value(totale);
+  }) : serataId = Value(serataId),
+       dataOra = Value(dataOra),
+       totale = Value(totale);
   static Insertable<OrdineData> custom({
     Expression<int>? id,
     Expression<int>? serataId,
@@ -982,11 +1126,12 @@ class OrdiniCompanion extends UpdateCompanion<OrdineData> {
     });
   }
 
-  OrdiniCompanion copyWith(
-      {Value<int>? id,
-      Value<int>? serataId,
-      Value<DateTime>? dataOra,
-      Value<double>? totale}) {
+  OrdiniCompanion copyWith({
+    Value<int>? id,
+    Value<int>? serataId,
+    Value<DateTime>? dataOra,
+    Value<double>? totale,
+  }) {
     return OrdiniCompanion(
       id: id ?? this.id,
       serataId: serataId ?? this.serataId,
@@ -1034,91 +1179,138 @@ class $OrdiniItemsTable extends OrdiniItems
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _ordineIdMeta =
-      const VerificationMeta('ordineId');
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _ordineIdMeta = const VerificationMeta(
+    'ordineId',
+  );
   @override
   late final GeneratedColumn<int> ordineId = GeneratedColumn<int>(
-      'ordine_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _prodottoIdMeta =
-      const VerificationMeta('prodottoId');
+    'ordine_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prodottoIdMeta = const VerificationMeta(
+    'prodottoId',
+  );
   @override
   late final GeneratedColumn<int> prodottoId = GeneratedColumn<int>(
-      'prodotto_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _prodottoNomeMeta =
-      const VerificationMeta('prodottoNome');
+    'prodotto_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prodottoNomeMeta = const VerificationMeta(
+    'prodottoNome',
+  );
   @override
   late final GeneratedColumn<String> prodottoNome = GeneratedColumn<String>(
-      'prodotto_nome', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _prezzoUnitarioMeta =
-      const VerificationMeta('prezzoUnitario');
+    'prodotto_nome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prezzoUnitarioMeta = const VerificationMeta(
+    'prezzoUnitario',
+  );
   @override
   late final GeneratedColumn<double> prezzoUnitario = GeneratedColumn<double>(
-      'prezzo_unitario', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _quantitaMeta =
-      const VerificationMeta('quantita');
+    'prezzo_unitario',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantitaMeta = const VerificationMeta(
+    'quantita',
+  );
   @override
   late final GeneratedColumn<int> quantita = GeneratedColumn<int>(
-      'quantita', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'quantita',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, ordineId, prodottoId, prodottoNome, prezzoUnitario, quantita];
+  List<GeneratedColumn> get $columns => [
+    id,
+    ordineId,
+    prodottoId,
+    prodottoNome,
+    prezzoUnitario,
+    quantita,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'ordini_items';
   @override
-  VerificationContext validateIntegrity(Insertable<OrdiniItem> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<OrdiniItem> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('ordine_id')) {
-      context.handle(_ordineIdMeta,
-          ordineId.isAcceptableOrUnknown(data['ordine_id']!, _ordineIdMeta));
+      context.handle(
+        _ordineIdMeta,
+        ordineId.isAcceptableOrUnknown(data['ordine_id']!, _ordineIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_ordineIdMeta);
     }
     if (data.containsKey('prodotto_id')) {
       context.handle(
-          _prodottoIdMeta,
-          prodottoId.isAcceptableOrUnknown(
-              data['prodotto_id']!, _prodottoIdMeta));
+        _prodottoIdMeta,
+        prodottoId.isAcceptableOrUnknown(data['prodotto_id']!, _prodottoIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_prodottoIdMeta);
     }
     if (data.containsKey('prodotto_nome')) {
       context.handle(
+        _prodottoNomeMeta,
+        prodottoNome.isAcceptableOrUnknown(
+          data['prodotto_nome']!,
           _prodottoNomeMeta,
-          prodottoNome.isAcceptableOrUnknown(
-              data['prodotto_nome']!, _prodottoNomeMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_prodottoNomeMeta);
     }
     if (data.containsKey('prezzo_unitario')) {
       context.handle(
+        _prezzoUnitarioMeta,
+        prezzoUnitario.isAcceptableOrUnknown(
+          data['prezzo_unitario']!,
           _prezzoUnitarioMeta,
-          prezzoUnitario.isAcceptableOrUnknown(
-              data['prezzo_unitario']!, _prezzoUnitarioMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_prezzoUnitarioMeta);
     }
     if (data.containsKey('quantita')) {
-      context.handle(_quantitaMeta,
-          quantita.isAcceptableOrUnknown(data['quantita']!, _quantitaMeta));
+      context.handle(
+        _quantitaMeta,
+        quantita.isAcceptableOrUnknown(data['quantita']!, _quantitaMeta),
+      );
     } else if (isInserting) {
       context.missing(_quantitaMeta);
     }
@@ -1131,18 +1323,30 @@ class $OrdiniItemsTable extends OrdiniItems
   OrdiniItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return OrdiniItem(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      ordineId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}ordine_id'])!,
-      prodottoId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}prodotto_id'])!,
-      prodottoNome: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}prodotto_nome'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      ordineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ordine_id'],
+      )!,
+      prodottoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prodotto_id'],
+      )!,
+      prodottoNome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prodotto_nome'],
+      )!,
       prezzoUnitario: attachedDatabase.typeMapping.read(
-          DriftSqlType.double, data['${effectivePrefix}prezzo_unitario'])!,
-      quantita: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}quantita'])!,
+        DriftSqlType.double,
+        data['${effectivePrefix}prezzo_unitario'],
+      )!,
+      quantita: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantita'],
+      )!,
     );
   }
 
@@ -1159,13 +1363,14 @@ class OrdiniItem extends DataClass implements Insertable<OrdiniItem> {
   final String prodottoNome;
   final double prezzoUnitario;
   final int quantita;
-  const OrdiniItem(
-      {required this.id,
-      required this.ordineId,
-      required this.prodottoId,
-      required this.prodottoNome,
-      required this.prezzoUnitario,
-      required this.quantita});
+  const OrdiniItem({
+    required this.id,
+    required this.ordineId,
+    required this.prodottoId,
+    required this.prodottoNome,
+    required this.prezzoUnitario,
+    required this.quantita,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1189,8 +1394,10 @@ class OrdiniItem extends DataClass implements Insertable<OrdiniItem> {
     );
   }
 
-  factory OrdiniItem.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory OrdiniItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return OrdiniItem(
       id: serializer.fromJson<int>(json['id']),
@@ -1214,27 +1421,28 @@ class OrdiniItem extends DataClass implements Insertable<OrdiniItem> {
     };
   }
 
-  OrdiniItem copyWith(
-          {int? id,
-          int? ordineId,
-          int? prodottoId,
-          String? prodottoNome,
-          double? prezzoUnitario,
-          int? quantita}) =>
-      OrdiniItem(
-        id: id ?? this.id,
-        ordineId: ordineId ?? this.ordineId,
-        prodottoId: prodottoId ?? this.prodottoId,
-        prodottoNome: prodottoNome ?? this.prodottoNome,
-        prezzoUnitario: prezzoUnitario ?? this.prezzoUnitario,
-        quantita: quantita ?? this.quantita,
-      );
+  OrdiniItem copyWith({
+    int? id,
+    int? ordineId,
+    int? prodottoId,
+    String? prodottoNome,
+    double? prezzoUnitario,
+    int? quantita,
+  }) => OrdiniItem(
+    id: id ?? this.id,
+    ordineId: ordineId ?? this.ordineId,
+    prodottoId: prodottoId ?? this.prodottoId,
+    prodottoNome: prodottoNome ?? this.prodottoNome,
+    prezzoUnitario: prezzoUnitario ?? this.prezzoUnitario,
+    quantita: quantita ?? this.quantita,
+  );
   OrdiniItem copyWithCompanion(OrdiniItemsCompanion data) {
     return OrdiniItem(
       id: data.id.present ? data.id.value : this.id,
       ordineId: data.ordineId.present ? data.ordineId.value : this.ordineId,
-      prodottoId:
-          data.prodottoId.present ? data.prodottoId.value : this.prodottoId,
+      prodottoId: data.prodottoId.present
+          ? data.prodottoId.value
+          : this.prodottoId,
       prodottoNome: data.prodottoNome.present
           ? data.prodottoNome.value
           : this.prodottoNome,
@@ -1260,7 +1468,13 @@ class OrdiniItem extends DataClass implements Insertable<OrdiniItem> {
 
   @override
   int get hashCode => Object.hash(
-      id, ordineId, prodottoId, prodottoNome, prezzoUnitario, quantita);
+    id,
+    ordineId,
+    prodottoId,
+    prodottoNome,
+    prezzoUnitario,
+    quantita,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1295,11 +1509,11 @@ class OrdiniItemsCompanion extends UpdateCompanion<OrdiniItem> {
     required String prodottoNome,
     required double prezzoUnitario,
     required int quantita,
-  })  : ordineId = Value(ordineId),
-        prodottoId = Value(prodottoId),
-        prodottoNome = Value(prodottoNome),
-        prezzoUnitario = Value(prezzoUnitario),
-        quantita = Value(quantita);
+  }) : ordineId = Value(ordineId),
+       prodottoId = Value(prodottoId),
+       prodottoNome = Value(prodottoNome),
+       prezzoUnitario = Value(prezzoUnitario),
+       quantita = Value(quantita);
   static Insertable<OrdiniItem> custom({
     Expression<int>? id,
     Expression<int>? ordineId,
@@ -1318,13 +1532,14 @@ class OrdiniItemsCompanion extends UpdateCompanion<OrdiniItem> {
     });
   }
 
-  OrdiniItemsCompanion copyWith(
-      {Value<int>? id,
-      Value<int>? ordineId,
-      Value<int>? prodottoId,
-      Value<String>? prodottoNome,
-      Value<double>? prezzoUnitario,
-      Value<int>? quantita}) {
+  OrdiniItemsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? ordineId,
+    Value<int>? prodottoId,
+    Value<String>? prodottoNome,
+    Value<double>? prezzoUnitario,
+    Value<int>? quantita,
+  }) {
     return OrdiniItemsCompanion(
       id: id ?? this.id,
       ordineId: ordineId ?? this.ordineId,
@@ -1385,22 +1600,29 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [serate, menus, prodotti, ordini, ordiniItems];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    serate,
+    menus,
+    prodotti,
+    ordini,
+    ordiniItems,
+  ];
 }
 
-typedef $$SerateTableCreateCompanionBuilder = SerateCompanion Function({
-  Value<int> id,
-  required String titolo,
-  required DateTime data,
-  Value<int?> menuId,
-});
-typedef $$SerateTableUpdateCompanionBuilder = SerateCompanion Function({
-  Value<int> id,
-  Value<String> titolo,
-  Value<DateTime> data,
-  Value<int?> menuId,
-});
+typedef $$SerateTableCreateCompanionBuilder =
+    SerateCompanion Function({
+      Value<int> id,
+      required String titolo,
+      required DateTime data,
+      Value<int?> menuId,
+    });
+typedef $$SerateTableUpdateCompanionBuilder =
+    SerateCompanion Function({
+      Value<int> id,
+      Value<String> titolo,
+      Value<DateTime> data,
+      Value<int?> menuId,
+    });
 
 class $$SerateTableFilterComposer
     extends Composer<_$AppDatabase, $SerateTable> {
@@ -1412,16 +1634,24 @@ class $$SerateTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get titolo => $composableBuilder(
-      column: $table.titolo, builder: (column) => ColumnFilters(column));
+    column: $table.titolo,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get data => $composableBuilder(
-      column: $table.data, builder: (column) => ColumnFilters(column));
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get menuId => $composableBuilder(
-      column: $table.menuId, builder: (column) => ColumnFilters(column));
+    column: $table.menuId,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SerateTableOrderingComposer
@@ -1434,16 +1664,24 @@ class $$SerateTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get titolo => $composableBuilder(
-      column: $table.titolo, builder: (column) => ColumnOrderings(column));
+    column: $table.titolo,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get data => $composableBuilder(
-      column: $table.data, builder: (column) => ColumnOrderings(column));
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get menuId => $composableBuilder(
-      column: $table.menuId, builder: (column) => ColumnOrderings(column));
+    column: $table.menuId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SerateTableAnnotationComposer
@@ -1468,20 +1706,24 @@ class $$SerateTableAnnotationComposer
       $composableBuilder(column: $table.menuId, builder: (column) => column);
 }
 
-class $$SerateTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $SerateTable,
-    SerataData,
-    $$SerateTableFilterComposer,
-    $$SerateTableOrderingComposer,
-    $$SerateTableAnnotationComposer,
-    $$SerateTableCreateCompanionBuilder,
-    $$SerateTableUpdateCompanionBuilder,
-    (SerataData, BaseReferences<_$AppDatabase, $SerateTable, SerataData>),
-    SerataData,
-    PrefetchHooks Function()> {
+class $$SerateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SerateTable,
+          SerataData,
+          $$SerateTableFilterComposer,
+          $$SerateTableOrderingComposer,
+          $$SerateTableAnnotationComposer,
+          $$SerateTableCreateCompanionBuilder,
+          $$SerateTableUpdateCompanionBuilder,
+          (SerataData, BaseReferences<_$AppDatabase, $SerateTable, SerataData>),
+          SerataData,
+          PrefetchHooks Function()
+        > {
   $$SerateTableTableManager(_$AppDatabase db, $SerateTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1490,57 +1732,56 @@ class $$SerateTableTableManager extends RootTableManager<
               $$SerateTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$SerateTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> titolo = const Value.absent(),
-            Value<DateTime> data = const Value.absent(),
-            Value<int?> menuId = const Value.absent(),
-          }) =>
-              SerateCompanion(
-            id: id,
-            titolo: titolo,
-            data: data,
-            menuId: menuId,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String titolo,
-            required DateTime data,
-            Value<int?> menuId = const Value.absent(),
-          }) =>
-              SerateCompanion.insert(
-            id: id,
-            titolo: titolo,
-            data: data,
-            menuId: menuId,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> titolo = const Value.absent(),
+                Value<DateTime> data = const Value.absent(),
+                Value<int?> menuId = const Value.absent(),
+              }) => SerateCompanion(
+                id: id,
+                titolo: titolo,
+                data: data,
+                menuId: menuId,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String titolo,
+                required DateTime data,
+                Value<int?> menuId = const Value.absent(),
+              }) => SerateCompanion.insert(
+                id: id,
+                titolo: titolo,
+                data: data,
+                menuId: menuId,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$SerateTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $SerateTable,
-    SerataData,
-    $$SerateTableFilterComposer,
-    $$SerateTableOrderingComposer,
-    $$SerateTableAnnotationComposer,
-    $$SerateTableCreateCompanionBuilder,
-    $$SerateTableUpdateCompanionBuilder,
-    (SerataData, BaseReferences<_$AppDatabase, $SerateTable, SerataData>),
-    SerataData,
-    PrefetchHooks Function()>;
-typedef $$MenusTableCreateCompanionBuilder = MenusCompanion Function({
-  Value<int> id,
-  required String nome,
-});
-typedef $$MenusTableUpdateCompanionBuilder = MenusCompanion Function({
-  Value<int> id,
-  Value<String> nome,
-});
+typedef $$SerateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SerateTable,
+      SerataData,
+      $$SerateTableFilterComposer,
+      $$SerateTableOrderingComposer,
+      $$SerateTableAnnotationComposer,
+      $$SerateTableCreateCompanionBuilder,
+      $$SerateTableUpdateCompanionBuilder,
+      (SerataData, BaseReferences<_$AppDatabase, $SerateTable, SerataData>),
+      SerataData,
+      PrefetchHooks Function()
+    >;
+typedef $$MenusTableCreateCompanionBuilder =
+    MenusCompanion Function({Value<int> id, required String nome});
+typedef $$MenusTableUpdateCompanionBuilder =
+    MenusCompanion Function({Value<int> id, Value<String> nome});
 
 class $$MenusTableFilterComposer extends Composer<_$AppDatabase, $MenusTable> {
   $$MenusTableFilterComposer({
@@ -1551,10 +1792,14 @@ class $$MenusTableFilterComposer extends Composer<_$AppDatabase, $MenusTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get nome => $composableBuilder(
-      column: $table.nome, builder: (column) => ColumnFilters(column));
+    column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$MenusTableOrderingComposer
@@ -1567,10 +1812,14 @@ class $$MenusTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get nome => $composableBuilder(
-      column: $table.nome, builder: (column) => ColumnOrderings(column));
+    column: $table.nome,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MenusTableAnnotationComposer
@@ -1589,20 +1838,24 @@ class $$MenusTableAnnotationComposer
       $composableBuilder(column: $table.nome, builder: (column) => column);
 }
 
-class $$MenusTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $MenusTable,
-    MenuData,
-    $$MenusTableFilterComposer,
-    $$MenusTableOrderingComposer,
-    $$MenusTableAnnotationComposer,
-    $$MenusTableCreateCompanionBuilder,
-    $$MenusTableUpdateCompanionBuilder,
-    (MenuData, BaseReferences<_$AppDatabase, $MenusTable, MenuData>),
-    MenuData,
-    PrefetchHooks Function()> {
+class $$MenusTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MenusTable,
+          MenuData,
+          $$MenusTableFilterComposer,
+          $$MenusTableOrderingComposer,
+          $$MenusTableAnnotationComposer,
+          $$MenusTableCreateCompanionBuilder,
+          $$MenusTableUpdateCompanionBuilder,
+          (MenuData, BaseReferences<_$AppDatabase, $MenusTable, MenuData>),
+          MenuData,
+          PrefetchHooks Function()
+        > {
   $$MenusTableTableManager(_$AppDatabase db, $MenusTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1611,57 +1864,54 @@ class $$MenusTableTableManager extends RootTableManager<
               $$MenusTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$MenusTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> nome = const Value.absent(),
-          }) =>
-              MenusCompanion(
-            id: id,
-            nome: nome,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String nome,
-          }) =>
-              MenusCompanion.insert(
-            id: id,
-            nome: nome,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> nome = const Value.absent(),
+              }) => MenusCompanion(id: id, nome: nome),
+          createCompanionCallback:
+              ({Value<int> id = const Value.absent(), required String nome}) =>
+                  MenusCompanion.insert(id: id, nome: nome),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$MenusTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $MenusTable,
-    MenuData,
-    $$MenusTableFilterComposer,
-    $$MenusTableOrderingComposer,
-    $$MenusTableAnnotationComposer,
-    $$MenusTableCreateCompanionBuilder,
-    $$MenusTableUpdateCompanionBuilder,
-    (MenuData, BaseReferences<_$AppDatabase, $MenusTable, MenuData>),
-    MenuData,
-    PrefetchHooks Function()>;
-typedef $$ProdottiTableCreateCompanionBuilder = ProdottiCompanion Function({
-  Value<int> id,
-  required String nome,
-  required double prezzo,
-  required int menuId,
-  required String categoria,
-  Value<int> quantita,
-});
-typedef $$ProdottiTableUpdateCompanionBuilder = ProdottiCompanion Function({
-  Value<int> id,
-  Value<String> nome,
-  Value<double> prezzo,
-  Value<int> menuId,
-  Value<String> categoria,
-  Value<int> quantita,
-});
+typedef $$MenusTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MenusTable,
+      MenuData,
+      $$MenusTableFilterComposer,
+      $$MenusTableOrderingComposer,
+      $$MenusTableAnnotationComposer,
+      $$MenusTableCreateCompanionBuilder,
+      $$MenusTableUpdateCompanionBuilder,
+      (MenuData, BaseReferences<_$AppDatabase, $MenusTable, MenuData>),
+      MenuData,
+      PrefetchHooks Function()
+    >;
+typedef $$ProdottiTableCreateCompanionBuilder =
+    ProdottiCompanion Function({
+      Value<int> id,
+      required String nome,
+      required double prezzo,
+      required int menuId,
+      required String categoria,
+      Value<int> quantita,
+    });
+typedef $$ProdottiTableUpdateCompanionBuilder =
+    ProdottiCompanion Function({
+      Value<int> id,
+      Value<String> nome,
+      Value<double> prezzo,
+      Value<int> menuId,
+      Value<String> categoria,
+      Value<int> quantita,
+    });
 
 class $$ProdottiTableFilterComposer
     extends Composer<_$AppDatabase, $ProdottiTable> {
@@ -1673,22 +1923,34 @@ class $$ProdottiTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get nome => $composableBuilder(
-      column: $table.nome, builder: (column) => ColumnFilters(column));
+    column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get prezzo => $composableBuilder(
-      column: $table.prezzo, builder: (column) => ColumnFilters(column));
+    column: $table.prezzo,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get menuId => $composableBuilder(
-      column: $table.menuId, builder: (column) => ColumnFilters(column));
+    column: $table.menuId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get categoria => $composableBuilder(
-      column: $table.categoria, builder: (column) => ColumnFilters(column));
+    column: $table.categoria,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get quantita => $composableBuilder(
-      column: $table.quantita, builder: (column) => ColumnFilters(column));
+    column: $table.quantita,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$ProdottiTableOrderingComposer
@@ -1701,22 +1963,34 @@ class $$ProdottiTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get nome => $composableBuilder(
-      column: $table.nome, builder: (column) => ColumnOrderings(column));
+    column: $table.nome,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get prezzo => $composableBuilder(
-      column: $table.prezzo, builder: (column) => ColumnOrderings(column));
+    column: $table.prezzo,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get menuId => $composableBuilder(
-      column: $table.menuId, builder: (column) => ColumnOrderings(column));
+    column: $table.menuId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get categoria => $composableBuilder(
-      column: $table.categoria, builder: (column) => ColumnOrderings(column));
+    column: $table.categoria,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get quantita => $composableBuilder(
-      column: $table.quantita, builder: (column) => ColumnOrderings(column));
+    column: $table.quantita,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProdottiTableAnnotationComposer
@@ -1747,20 +2021,27 @@ class $$ProdottiTableAnnotationComposer
       $composableBuilder(column: $table.quantita, builder: (column) => column);
 }
 
-class $$ProdottiTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $ProdottiTable,
-    ProdottoData,
-    $$ProdottiTableFilterComposer,
-    $$ProdottiTableOrderingComposer,
-    $$ProdottiTableAnnotationComposer,
-    $$ProdottiTableCreateCompanionBuilder,
-    $$ProdottiTableUpdateCompanionBuilder,
-    (ProdottoData, BaseReferences<_$AppDatabase, $ProdottiTable, ProdottoData>),
-    ProdottoData,
-    PrefetchHooks Function()> {
+class $$ProdottiTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProdottiTable,
+          ProdottoData,
+          $$ProdottiTableFilterComposer,
+          $$ProdottiTableOrderingComposer,
+          $$ProdottiTableAnnotationComposer,
+          $$ProdottiTableCreateCompanionBuilder,
+          $$ProdottiTableUpdateCompanionBuilder,
+          (
+            ProdottoData,
+            BaseReferences<_$AppDatabase, $ProdottiTable, ProdottoData>,
+          ),
+          ProdottoData,
+          PrefetchHooks Function()
+        > {
   $$ProdottiTableTableManager(_$AppDatabase db, $ProdottiTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1769,69 +2050,77 @@ class $$ProdottiTableTableManager extends RootTableManager<
               $$ProdottiTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$ProdottiTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> nome = const Value.absent(),
-            Value<double> prezzo = const Value.absent(),
-            Value<int> menuId = const Value.absent(),
-            Value<String> categoria = const Value.absent(),
-            Value<int> quantita = const Value.absent(),
-          }) =>
-              ProdottiCompanion(
-            id: id,
-            nome: nome,
-            prezzo: prezzo,
-            menuId: menuId,
-            categoria: categoria,
-            quantita: quantita,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String nome,
-            required double prezzo,
-            required int menuId,
-            required String categoria,
-            Value<int> quantita = const Value.absent(),
-          }) =>
-              ProdottiCompanion.insert(
-            id: id,
-            nome: nome,
-            prezzo: prezzo,
-            menuId: menuId,
-            categoria: categoria,
-            quantita: quantita,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> nome = const Value.absent(),
+                Value<double> prezzo = const Value.absent(),
+                Value<int> menuId = const Value.absent(),
+                Value<String> categoria = const Value.absent(),
+                Value<int> quantita = const Value.absent(),
+              }) => ProdottiCompanion(
+                id: id,
+                nome: nome,
+                prezzo: prezzo,
+                menuId: menuId,
+                categoria: categoria,
+                quantita: quantita,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String nome,
+                required double prezzo,
+                required int menuId,
+                required String categoria,
+                Value<int> quantita = const Value.absent(),
+              }) => ProdottiCompanion.insert(
+                id: id,
+                nome: nome,
+                prezzo: prezzo,
+                menuId: menuId,
+                categoria: categoria,
+                quantita: quantita,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$ProdottiTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $ProdottiTable,
-    ProdottoData,
-    $$ProdottiTableFilterComposer,
-    $$ProdottiTableOrderingComposer,
-    $$ProdottiTableAnnotationComposer,
-    $$ProdottiTableCreateCompanionBuilder,
-    $$ProdottiTableUpdateCompanionBuilder,
-    (ProdottoData, BaseReferences<_$AppDatabase, $ProdottiTable, ProdottoData>),
-    ProdottoData,
-    PrefetchHooks Function()>;
-typedef $$OrdiniTableCreateCompanionBuilder = OrdiniCompanion Function({
-  Value<int> id,
-  required int serataId,
-  required DateTime dataOra,
-  required double totale,
-});
-typedef $$OrdiniTableUpdateCompanionBuilder = OrdiniCompanion Function({
-  Value<int> id,
-  Value<int> serataId,
-  Value<DateTime> dataOra,
-  Value<double> totale,
-});
+typedef $$ProdottiTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProdottiTable,
+      ProdottoData,
+      $$ProdottiTableFilterComposer,
+      $$ProdottiTableOrderingComposer,
+      $$ProdottiTableAnnotationComposer,
+      $$ProdottiTableCreateCompanionBuilder,
+      $$ProdottiTableUpdateCompanionBuilder,
+      (
+        ProdottoData,
+        BaseReferences<_$AppDatabase, $ProdottiTable, ProdottoData>,
+      ),
+      ProdottoData,
+      PrefetchHooks Function()
+    >;
+typedef $$OrdiniTableCreateCompanionBuilder =
+    OrdiniCompanion Function({
+      Value<int> id,
+      required int serataId,
+      required DateTime dataOra,
+      required double totale,
+    });
+typedef $$OrdiniTableUpdateCompanionBuilder =
+    OrdiniCompanion Function({
+      Value<int> id,
+      Value<int> serataId,
+      Value<DateTime> dataOra,
+      Value<double> totale,
+    });
 
 class $$OrdiniTableFilterComposer
     extends Composer<_$AppDatabase, $OrdiniTable> {
@@ -1843,16 +2132,24 @@ class $$OrdiniTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get serataId => $composableBuilder(
-      column: $table.serataId, builder: (column) => ColumnFilters(column));
+    column: $table.serataId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get dataOra => $composableBuilder(
-      column: $table.dataOra, builder: (column) => ColumnFilters(column));
+    column: $table.dataOra,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get totale => $composableBuilder(
-      column: $table.totale, builder: (column) => ColumnFilters(column));
+    column: $table.totale,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$OrdiniTableOrderingComposer
@@ -1865,16 +2162,24 @@ class $$OrdiniTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get serataId => $composableBuilder(
-      column: $table.serataId, builder: (column) => ColumnOrderings(column));
+    column: $table.serataId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get dataOra => $composableBuilder(
-      column: $table.dataOra, builder: (column) => ColumnOrderings(column));
+    column: $table.dataOra,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get totale => $composableBuilder(
-      column: $table.totale, builder: (column) => ColumnOrderings(column));
+    column: $table.totale,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrdiniTableAnnotationComposer
@@ -1899,20 +2204,24 @@ class $$OrdiniTableAnnotationComposer
       $composableBuilder(column: $table.totale, builder: (column) => column);
 }
 
-class $$OrdiniTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $OrdiniTable,
-    OrdineData,
-    $$OrdiniTableFilterComposer,
-    $$OrdiniTableOrderingComposer,
-    $$OrdiniTableAnnotationComposer,
-    $$OrdiniTableCreateCompanionBuilder,
-    $$OrdiniTableUpdateCompanionBuilder,
-    (OrdineData, BaseReferences<_$AppDatabase, $OrdiniTable, OrdineData>),
-    OrdineData,
-    PrefetchHooks Function()> {
+class $$OrdiniTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OrdiniTable,
+          OrdineData,
+          $$OrdiniTableFilterComposer,
+          $$OrdiniTableOrderingComposer,
+          $$OrdiniTableAnnotationComposer,
+          $$OrdiniTableCreateCompanionBuilder,
+          $$OrdiniTableUpdateCompanionBuilder,
+          (OrdineData, BaseReferences<_$AppDatabase, $OrdiniTable, OrdineData>),
+          OrdineData,
+          PrefetchHooks Function()
+        > {
   $$OrdiniTableTableManager(_$AppDatabase db, $OrdiniTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -1921,67 +2230,70 @@ class $$OrdiniTableTableManager extends RootTableManager<
               $$OrdiniTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$OrdiniTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> serataId = const Value.absent(),
-            Value<DateTime> dataOra = const Value.absent(),
-            Value<double> totale = const Value.absent(),
-          }) =>
-              OrdiniCompanion(
-            id: id,
-            serataId: serataId,
-            dataOra: dataOra,
-            totale: totale,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required int serataId,
-            required DateTime dataOra,
-            required double totale,
-          }) =>
-              OrdiniCompanion.insert(
-            id: id,
-            serataId: serataId,
-            dataOra: dataOra,
-            totale: totale,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> serataId = const Value.absent(),
+                Value<DateTime> dataOra = const Value.absent(),
+                Value<double> totale = const Value.absent(),
+              }) => OrdiniCompanion(
+                id: id,
+                serataId: serataId,
+                dataOra: dataOra,
+                totale: totale,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int serataId,
+                required DateTime dataOra,
+                required double totale,
+              }) => OrdiniCompanion.insert(
+                id: id,
+                serataId: serataId,
+                dataOra: dataOra,
+                totale: totale,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$OrdiniTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $OrdiniTable,
-    OrdineData,
-    $$OrdiniTableFilterComposer,
-    $$OrdiniTableOrderingComposer,
-    $$OrdiniTableAnnotationComposer,
-    $$OrdiniTableCreateCompanionBuilder,
-    $$OrdiniTableUpdateCompanionBuilder,
-    (OrdineData, BaseReferences<_$AppDatabase, $OrdiniTable, OrdineData>),
-    OrdineData,
-    PrefetchHooks Function()>;
-typedef $$OrdiniItemsTableCreateCompanionBuilder = OrdiniItemsCompanion
-    Function({
-  Value<int> id,
-  required int ordineId,
-  required int prodottoId,
-  required String prodottoNome,
-  required double prezzoUnitario,
-  required int quantita,
-});
-typedef $$OrdiniItemsTableUpdateCompanionBuilder = OrdiniItemsCompanion
-    Function({
-  Value<int> id,
-  Value<int> ordineId,
-  Value<int> prodottoId,
-  Value<String> prodottoNome,
-  Value<double> prezzoUnitario,
-  Value<int> quantita,
-});
+typedef $$OrdiniTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OrdiniTable,
+      OrdineData,
+      $$OrdiniTableFilterComposer,
+      $$OrdiniTableOrderingComposer,
+      $$OrdiniTableAnnotationComposer,
+      $$OrdiniTableCreateCompanionBuilder,
+      $$OrdiniTableUpdateCompanionBuilder,
+      (OrdineData, BaseReferences<_$AppDatabase, $OrdiniTable, OrdineData>),
+      OrdineData,
+      PrefetchHooks Function()
+    >;
+typedef $$OrdiniItemsTableCreateCompanionBuilder =
+    OrdiniItemsCompanion Function({
+      Value<int> id,
+      required int ordineId,
+      required int prodottoId,
+      required String prodottoNome,
+      required double prezzoUnitario,
+      required int quantita,
+    });
+typedef $$OrdiniItemsTableUpdateCompanionBuilder =
+    OrdiniItemsCompanion Function({
+      Value<int> id,
+      Value<int> ordineId,
+      Value<int> prodottoId,
+      Value<String> prodottoNome,
+      Value<double> prezzoUnitario,
+      Value<int> quantita,
+    });
 
 class $$OrdiniItemsTableFilterComposer
     extends Composer<_$AppDatabase, $OrdiniItemsTable> {
@@ -1993,23 +2305,34 @@ class $$OrdiniItemsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get ordineId => $composableBuilder(
-      column: $table.ordineId, builder: (column) => ColumnFilters(column));
+    column: $table.ordineId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get prodottoId => $composableBuilder(
-      column: $table.prodottoId, builder: (column) => ColumnFilters(column));
+    column: $table.prodottoId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get prodottoNome => $composableBuilder(
-      column: $table.prodottoNome, builder: (column) => ColumnFilters(column));
+    column: $table.prodottoNome,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get prezzoUnitario => $composableBuilder(
-      column: $table.prezzoUnitario,
-      builder: (column) => ColumnFilters(column));
+    column: $table.prezzoUnitario,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get quantita => $composableBuilder(
-      column: $table.quantita, builder: (column) => ColumnFilters(column));
+    column: $table.quantita,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$OrdiniItemsTableOrderingComposer
@@ -2022,24 +2345,34 @@ class $$OrdiniItemsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get ordineId => $composableBuilder(
-      column: $table.ordineId, builder: (column) => ColumnOrderings(column));
+    column: $table.ordineId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get prodottoId => $composableBuilder(
-      column: $table.prodottoId, builder: (column) => ColumnOrderings(column));
+    column: $table.prodottoId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get prodottoNome => $composableBuilder(
-      column: $table.prodottoNome,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.prodottoNome,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get prezzoUnitario => $composableBuilder(
-      column: $table.prezzoUnitario,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.prezzoUnitario,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get quantita => $composableBuilder(
-      column: $table.quantita, builder: (column) => ColumnOrderings(column));
+    column: $table.quantita,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrdiniItemsTableAnnotationComposer
@@ -2058,32 +2391,45 @@ class $$OrdiniItemsTableAnnotationComposer
       $composableBuilder(column: $table.ordineId, builder: (column) => column);
 
   GeneratedColumn<int> get prodottoId => $composableBuilder(
-      column: $table.prodottoId, builder: (column) => column);
+    column: $table.prodottoId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get prodottoNome => $composableBuilder(
-      column: $table.prodottoNome, builder: (column) => column);
+    column: $table.prodottoNome,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get prezzoUnitario => $composableBuilder(
-      column: $table.prezzoUnitario, builder: (column) => column);
+    column: $table.prezzoUnitario,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get quantita =>
       $composableBuilder(column: $table.quantita, builder: (column) => column);
 }
 
-class $$OrdiniItemsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $OrdiniItemsTable,
-    OrdiniItem,
-    $$OrdiniItemsTableFilterComposer,
-    $$OrdiniItemsTableOrderingComposer,
-    $$OrdiniItemsTableAnnotationComposer,
-    $$OrdiniItemsTableCreateCompanionBuilder,
-    $$OrdiniItemsTableUpdateCompanionBuilder,
-    (OrdiniItem, BaseReferences<_$AppDatabase, $OrdiniItemsTable, OrdiniItem>),
-    OrdiniItem,
-    PrefetchHooks Function()> {
+class $$OrdiniItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OrdiniItemsTable,
+          OrdiniItem,
+          $$OrdiniItemsTableFilterComposer,
+          $$OrdiniItemsTableOrderingComposer,
+          $$OrdiniItemsTableAnnotationComposer,
+          $$OrdiniItemsTableCreateCompanionBuilder,
+          $$OrdiniItemsTableUpdateCompanionBuilder,
+          (
+            OrdiniItem,
+            BaseReferences<_$AppDatabase, $OrdiniItemsTable, OrdiniItem>,
+          ),
+          OrdiniItem,
+          PrefetchHooks Function()
+        > {
   $$OrdiniItemsTableTableManager(_$AppDatabase db, $OrdiniItemsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -2092,57 +2438,63 @@ class $$OrdiniItemsTableTableManager extends RootTableManager<
               $$OrdiniItemsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$OrdiniItemsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> ordineId = const Value.absent(),
-            Value<int> prodottoId = const Value.absent(),
-            Value<String> prodottoNome = const Value.absent(),
-            Value<double> prezzoUnitario = const Value.absent(),
-            Value<int> quantita = const Value.absent(),
-          }) =>
-              OrdiniItemsCompanion(
-            id: id,
-            ordineId: ordineId,
-            prodottoId: prodottoId,
-            prodottoNome: prodottoNome,
-            prezzoUnitario: prezzoUnitario,
-            quantita: quantita,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required int ordineId,
-            required int prodottoId,
-            required String prodottoNome,
-            required double prezzoUnitario,
-            required int quantita,
-          }) =>
-              OrdiniItemsCompanion.insert(
-            id: id,
-            ordineId: ordineId,
-            prodottoId: prodottoId,
-            prodottoNome: prodottoNome,
-            prezzoUnitario: prezzoUnitario,
-            quantita: quantita,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> ordineId = const Value.absent(),
+                Value<int> prodottoId = const Value.absent(),
+                Value<String> prodottoNome = const Value.absent(),
+                Value<double> prezzoUnitario = const Value.absent(),
+                Value<int> quantita = const Value.absent(),
+              }) => OrdiniItemsCompanion(
+                id: id,
+                ordineId: ordineId,
+                prodottoId: prodottoId,
+                prodottoNome: prodottoNome,
+                prezzoUnitario: prezzoUnitario,
+                quantita: quantita,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int ordineId,
+                required int prodottoId,
+                required String prodottoNome,
+                required double prezzoUnitario,
+                required int quantita,
+              }) => OrdiniItemsCompanion.insert(
+                id: id,
+                ordineId: ordineId,
+                prodottoId: prodottoId,
+                prodottoNome: prodottoNome,
+                prezzoUnitario: prezzoUnitario,
+                quantita: quantita,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$OrdiniItemsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $OrdiniItemsTable,
-    OrdiniItem,
-    $$OrdiniItemsTableFilterComposer,
-    $$OrdiniItemsTableOrderingComposer,
-    $$OrdiniItemsTableAnnotationComposer,
-    $$OrdiniItemsTableCreateCompanionBuilder,
-    $$OrdiniItemsTableUpdateCompanionBuilder,
-    (OrdiniItem, BaseReferences<_$AppDatabase, $OrdiniItemsTable, OrdiniItem>),
-    OrdiniItem,
-    PrefetchHooks Function()>;
+typedef $$OrdiniItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OrdiniItemsTable,
+      OrdiniItem,
+      $$OrdiniItemsTableFilterComposer,
+      $$OrdiniItemsTableOrderingComposer,
+      $$OrdiniItemsTableAnnotationComposer,
+      $$OrdiniItemsTableCreateCompanionBuilder,
+      $$OrdiniItemsTableUpdateCompanionBuilder,
+      (
+        OrdiniItem,
+        BaseReferences<_$AppDatabase, $OrdiniItemsTable, OrdiniItem>,
+      ),
+      OrdiniItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;

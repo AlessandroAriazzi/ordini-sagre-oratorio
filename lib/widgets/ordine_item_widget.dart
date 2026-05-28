@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/ordine.dart';
+import '../theme.dart';
 
 class OrdineItemWidget extends StatelessWidget {
   final OrdineItem item;
@@ -18,7 +19,7 @@ class OrdineItemWidget extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Row(
           children: [
             Expanded(
@@ -28,16 +29,17 @@ class OrdineItemWidget extends StatelessWidget {
                   Text(
                     item.prodottoNome,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     '€${item.prezzoUnitario.toStringAsFixed(2)} cad.',
                     style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
                     ),
                   ),
                 ],
@@ -52,7 +54,9 @@ class OrdineItemWidget extends StatelessWidget {
                       onQuantityChanged(item.quantita - 1);
                     }
                   },
-                  color: item.quantita > 1 ? Colors.blue : Colors.grey,
+                  color: item.quantita > 1
+                      ? AppTheme.secondaryColor
+                      : AppTheme.textLight,
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -60,21 +64,25 @@ class OrdineItemWidget extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: AppTheme.secondaryColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.secondaryColor.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Text(
                     '${item.quantita}',
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.secondaryColor,
                     ),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline),
                   onPressed: () => onQuantityChanged(item.quantita + 1),
-                  color: Colors.blue,
+                  color: AppTheme.secondaryColor,
                 ),
               ],
             ),
@@ -85,15 +93,15 @@ class OrdineItemWidget extends StatelessWidget {
                 Text(
                   '€${item.totale.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.successColor,
                   ),
                 ),
                 const SizedBox(height: 4),
                 IconButton(
-                  icon: const Icon(Icons.delete, size: 20),
-                  color: Colors.red,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                  color: AppTheme.dangerColor,
                   onPressed: onDelete,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

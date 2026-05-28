@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:drift/drift.dart' as drift;
 import '../database/database.dart';
@@ -97,7 +96,7 @@ class MenusNotifier extends _$MenusNotifier {
 
 @riverpod
 Future<models.Menu?> menuById(Ref ref, int menuId) async {
-  final menus = await ref.watch(menusNotifierProvider.future);
+  final menus = await ref.watch(menusProvider.future);
   try {
     final menuList = menus.where((m) => m.id == menuId).toList();
     return menuList.isNotEmpty ? menuList.first : null;

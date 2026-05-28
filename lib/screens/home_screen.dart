@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../theme.dart';
 import '../providers/serate_provider.dart';
 import '../providers/menu_provider.dart';
@@ -10,135 +11,111 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final serateAsync = ref.watch(serateNotifierProvider);
-    final menusAsync = ref.watch(menusNotifierProvider);
+    final serateAsync = ref.watch(serateProvider);
+    final menusAsync = ref.watch(menusProvider);
 
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(40.0),
+          padding: const EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Page header
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha: 0.7)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.secondaryColor.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Dashboard',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: -0.3,
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.restaurant,
-                      color: Colors.white,
-                      size: 48,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        DateFormat('EEEE d MMMM yyyy', 'it_IT').format(DateTime.now()),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/menu/new'),
+                    icon: const Icon(Icons.add_rounded, size: 16),
+                    label: const Text('Nuovo Menù'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.textSecondary,
+                      side: const BorderSide(color: AppTheme.borderColor),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                   ),
-                  const SizedBox(width: 24),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Benvenuto',
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Sistema di gestione ordini per feste di paese',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
+                  const SizedBox(width: 8),
+                  FilledButton.icon(
+                    onPressed: () => context.go('/serate'),
+                    icon: const Icon(Icons.add_rounded, size: 16),
+                    label: const Text('Nuova Serata'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.secondaryColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 48),
-              
-              // Quick Stats
+
+              const SizedBox(height: 24),
+              const Divider(color: AppTheme.borderColor),
+              const SizedBox(height: 24),
+
+              // KPI row
               Row(
                 children: [
                   Expanded(
-                    child: _StatCard(
+                    child: _KpiCard(
                       icon: Icons.event_rounded,
-                      title: 'Serate',
+                      label: 'Serate',
                       value: serateAsync.when(
-                        data: (serate) => '${serate.length}',
-                        loading: () => '...',
-                        error: (_, __) => 'Errore',
-                      ),
-                      subtitle: serateAsync.when(
-                        data: (serate) => serate.length == 1 ? 'serata attiva' : 'serate attive',
-                        loading: () => 'Caricamento...',
-                        error: (_, __) => 'Errore caricamento',
+                        data: (s) => '${s.length}',
+                        loading: () => '—',
+                        error: (_, _) => '!',
                       ),
                       color: AppTheme.secondaryColor,
                       onTap: () => context.go('/serate'),
                     ),
                   ),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: _StatCard(
+                    child: _KpiCard(
                       icon: Icons.restaurant_menu_rounded,
-                      title: 'Menù',
+                      label: 'Menù',
                       value: menusAsync.when(
-                        data: (menus) => '${menus.length}',
-                        loading: () => '...',
-                        error: (_, __) => 'Errore',
-                      ),
-                      subtitle: menusAsync.when(
-                        data: (menus) => menus.length == 1 ? 'menù disponibile' : 'menù disponibili',
-                        loading: () => 'Caricamento...',
-                        error: (_, __) => 'Errore caricamento',
+                        data: (m) => '${m.length}',
+                        loading: () => '—',
+                        error: (_, _) => '!',
                       ),
                       color: AppTheme.successColor,
                       onTap: () => context.go('/menu/new'),
                     ),
                   ),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: _StatCard(
+                    child: _KpiCard(
                       icon: Icons.inventory_2_rounded,
-                      title: 'Prodotti',
+                      label: 'Prodotti totali',
                       value: menusAsync.when(
-                        data: (menus) {
-                          final totalProdotti = menus.fold(
-                            0,
-                            (sum, menu) => sum + menu.prodotti.length,
-                          );
-                          return '$totalProdotti';
-                        },
-                        loading: () => '...',
-                        error: (_, __) => 'Errore',
-                      ),
-                      subtitle: menusAsync.when(
-                        data: (menus) {
-                          final totalProdotti = menus.fold(
-                            0,
-                            (sum, menu) => sum + menu.prodotti.length,
-                          );
-                          return totalProdotti == 1 ? 'prodotto totale' : 'prodotti totali';
-                        },
-                        loading: () => 'Caricamento...',
-                        error: (_, __) => 'Errore caricamento',
+                        data: (m) => '${m.fold(0, (sum, menu) => sum + menu.prodotti.length)}',
+                        loading: () => '—',
+                        error: (_, _) => '!',
                       ),
                       color: AppTheme.warningColor,
                       onTap: () => context.go('/menu/new'),
@@ -146,103 +123,46 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 48),
-              
-              // Quick Actions
-              const Text(
-                'Azioni Rapide',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: _ActionCard(
-                      icon: Icons.add_circle_rounded,
-                      title: 'Nuova Serata',
-                      description: 'Crea una nuova serata e inizia a gestire gli ordini',
-                      color: AppTheme.secondaryColor,
-                      onTap: () => context.go('/serate'),
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: _ActionCard(
-                      icon: Icons.add_box_rounded,
-                      title: 'Nuovo Menù',
-                      description: 'Crea un nuovo menù con i prodotti della festa',
-                      color: AppTheme.successColor,
-                      onTap: () => context.go('/menu/new'),
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              
+
+              const SizedBox(height: 32),
+
+              // Recent serate table
               serateAsync.when(
                 data: (serate) {
                   if (serate.isEmpty) return const SizedBox.shrink();
-                  
-                  final ultimeSerate = serate.take(3).toList();
-                  
+                  final recent = serate.take(5).toList();
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Serate Recenti',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Serate recenti',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () => context.go('/serate'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppTheme.secondaryColor,
+                              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                              padding: EdgeInsets.zero,
+                            ),
+                            child: const Text('Vedi tutte →'),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      ...ultimeSerate.map((serata) => Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(16),
-                          leading: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppTheme.secondaryColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.event_rounded,
-                              color: AppTheme.secondaryColor,
-                              size: 28,
-                            ),
-                          ),
-                          title: Text(
-                            serata.titolo,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              _formatDate(serata.data),
-                              style: const TextStyle(color: AppTheme.textSecondary),
-                            ),
-                          ),
-                          trailing: const Icon(Icons.chevron_right_rounded),
-                          onTap: () => context.go('/serata/${serata.id}'),
-                        ),
-                      )),
+                      const SizedBox(height: 10),
+                      _SerateTable(serate: recent),
                     ],
                   );
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
             ],
           ),
@@ -250,115 +170,99 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    
-    if (diff.inDays == 0) {
-      return 'Oggi';
-    } else if (diff.inDays == 1) {
-      return 'Ieri';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays} giorni fa';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
-  }
 }
 
-class _StatCard extends StatefulWidget {
+class _KpiCard extends StatefulWidget {
   final IconData icon;
-  final String title;
+  final String label;
   final String value;
-  final String subtitle;
   final Color color;
   final VoidCallback onTap;
 
-  const _StatCard({
+  const _KpiCard({
     required this.icon,
-    required this.title,
+    required this.label,
     required this.value,
-    required this.subtitle,
     required this.color,
     required this.onTap,
   });
 
   @override
-  State<_StatCard> createState() => _StatCardState();
+  State<_KpiCard> createState() => _KpiCardState();
 }
 
-class _StatCardState extends State<_StatCard> {
-  bool isHovered = false;
+class _KpiCardState extends State<_KpiCard> {
+  bool _hover = false;
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => isHovered = true),
-      onExit: (_) => setState(() => isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(0, isHovered ? -4 : 0, 0),
-        child: Card(
-          elevation: isHovered ? 8 : 2,
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.cardColor,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _hover
+                  ? widget.color.withValues(alpha: 0.4)
+                  : AppTheme.borderColor,
+            ),
+            boxShadow: _hover
+                ? [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: widget.color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          widget.icon,
-                          color: widget.color,
-                          size: 32,
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        color: widget.color,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    widget.value,
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: widget.color,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: widget.color.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    child: Icon(widget.icon, color: widget.color, size: 18),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.subtitle,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textSecondary,
-                    ),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: widget.color.withValues(alpha: 0.5),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 16),
+              Text(
+                widget.value,
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                  color: widget.color,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                widget.label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -366,90 +270,127 @@ class _StatCardState extends State<_StatCard> {
   }
 }
 
-class _ActionCard extends StatefulWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  State<_ActionCard> createState() => _ActionCardState();
-}
-
-class _ActionCardState extends State<_ActionCard> {
-  bool isHovered = false;
+class _SerateTable extends StatelessWidget {
+  final List<dynamic> serate;
+  const _SerateTable({required this.serate});
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => isHovered = true),
-      onExit: (_) => setState(() => isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(0, isHovered ? -4 : 0, 0),
-        child: Card(
-          elevation: isHovered ? 8 : 2,
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppTheme.borderColor),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Column(
+          children: [
+            // Header
+            Container(
+              color: AppTheme.backgroundColor,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: const Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [widget.color, widget.color.withValues(alpha: 0.7)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      widget.icon,
-                      color: Colors.white,
-                      size: 32,
-                    ),
+                  SizedBox(
+                    width: 28,
+                    child: Text('N°', style: _headerStyle),
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.description,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    color: widget.color,
+                  SizedBox(width: 16),
+                  Expanded(child: Text('Nome', style: _headerStyle)),
+                  SizedBox(
+                    width: 160,
+                    child: Text('Data', style: _headerStyle),
                   ),
                 ],
               ),
             ),
+            const Divider(height: 1, color: AppTheme.borderColor),
+            ...serate.asMap().entries.map((e) {
+              final i = e.key;
+              final serata = e.value;
+              return Column(
+                children: [
+                  if (i > 0)
+                    const Divider(height: 1, color: AppTheme.borderColor),
+                  _SerataTableRow(
+                    serata: serata,
+                    onTap: () => context.go('/serata/${serata.id}'),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static const _headerStyle = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textSecondary,
+    letterSpacing: 0.5,
+  );
+}
+
+class _SerataTableRow extends StatefulWidget {
+  final dynamic serata;
+  final VoidCallback onTap;
+  const _SerataTableRow({required this.serata, required this.onTap});
+
+  @override
+  State<_SerataTableRow> createState() => _SerataTableRowState();
+}
+
+class _SerataTableRowState extends State<_SerataTableRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          color: _hover ? AppTheme.backgroundColor : Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 28,
+                child: Text(
+                  '${widget.serata.id}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  widget.serata.titolo,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 160,
+                child: Text(
+                  DateFormat('dd MMM yyyy', 'it_IT').format(widget.serata.data),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -61,11 +61,6 @@ class OrdiniNotifier extends _$OrdiniNotifier {
     final existingItem = existingItemList.isNotEmpty ? existingItemList.first : null;
     
     if (existingItem != null) {
-      // Verifica se c'è abbastanza quantità per incrementare
-      if (prodotto.quantita < existingItem.quantita + 1) {
-        throw Exception('Quantità insufficiente');
-      }
-      
       // Update quantity
       await db.updateOrdineItem(OrdiniItemsCompanion(
         id: drift.Value(existingItem.id),
@@ -87,7 +82,7 @@ class OrdiniNotifier extends _$OrdiniNotifier {
     }
     
     // Aggiorna la quantità del prodotto nel menu
-    await ref.read(menusNotifierProvider.notifier).updateProdottoQuantita(
+    await ref.read(menusProvider.notifier).updateProdottoQuantita(
       prodottoId, 
       prodotto.quantita - 1
     );
@@ -103,7 +98,7 @@ class OrdiniNotifier extends _$OrdiniNotifier {
     
     // Ripristina la quantità nel prodotto
     final prodotto = await db.getProdotto(item.prodottoId);
-    await ref.read(menusNotifierProvider.notifier).updateProdottoQuantita(
+    await ref.read(menusProvider.notifier).updateProdottoQuantita(
       item.prodottoId, 
       prodotto.quantita + item.quantita
     );
@@ -136,7 +131,7 @@ class OrdiniNotifier extends _$OrdiniNotifier {
     ));
     
     // Aggiorna la quantità del prodotto
-    await ref.read(menusNotifierProvider.notifier).updateProdottoQuantita(
+    await ref.read(menusProvider.notifier).updateProdottoQuantita(
       item.prodottoId, 
       nuovaQuantitaProdotto
     );
@@ -166,7 +161,7 @@ class OrdiniNotifier extends _$OrdiniNotifier {
     // Ripristina le quantità di tutti i prodotti dell'ordine
     for (final item in items) {
       final prodotto = await db.getProdotto(item.prodottoId);
-      await ref.read(menusNotifierProvider.notifier).updateProdottoQuantita(
+      await ref.read(menusProvider.notifier).updateProdottoQuantita(
         item.prodottoId, 
         prodotto.quantita + item.quantita
       );

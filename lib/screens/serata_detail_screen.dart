@@ -9,349 +9,585 @@ import '../providers/ordini_provider.dart';
 
 class SerataDetailScreen extends ConsumerWidget {
   final int serataId;
-  
 
   const SerataDetailScreen({super.key, required this.serataId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final serateAsync = ref.watch(serateNotifierProvider);
-    final menusAsync = ref.watch(menusNotifierProvider);
-    final ordiniAsync = ref.watch(ordiniNotifierProvider(serataId));
+    final serateAsync = ref.watch(serateProvider);
+    final menusAsync = ref.watch(menusProvider);
+    final ordiniAsync = ref.watch(ordiniProvider(serataId));
 
     return serateAsync.when(
       data: (serate) {
-        final serataList = serate.where((s) => s.id == serataId).toList();
-        final serata = serataList.isNotEmpty ? serataList.first : null;
+        final serata = serate.where((s) => s.id == serataId).firstOrNull;
         if (serata == null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Serata non trovata')),
-            body: const Center(child: Text('Serata non trovata')),
+          return const Scaffold(
+            body: Center(child: Text('Serata non trovata')),
           );
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(serata.titolo),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.go('/serate'),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.assessment_rounded),
-                tooltip: 'Resoconto',
-                onPressed: () => context.go('/resoconto/$serataId'),
-              ),
-            ],
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+          body: Column(
+            children: [
+              // Breadcrumb header
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    bottom: BorderSide(color: AppTheme.borderColor),
+                  ),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () => context.go('/serate'),
+                      borderRadius: BorderRadius.circular(6),
+                      child: const Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [AppTheme.secondaryColor, AppTheme.secondaryColor.withValues(alpha: 0.7)],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.event_rounded, size: 32, color: Colors.white),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    serata.titolo,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    DateFormat('EEEE dd MMMM yyyy', 'it_IT').format(serata.data),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                  ),
-                                ],
+                            Icon(Icons.chevron_left_rounded,
+                                size: 18, color: AppTheme.textSecondary),
+                            Text(
+                              'Serate',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
-                        const Divider(height: 32),
-                        const Text(
-                          'Menù assegnato',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        menusAsync.when(
-                          data: (menus) {
-                            final currentMenuList = serata.menuId != null
-                                ? menus.where((m) => m.id == serata.menuId).toList()
-                                : <dynamic>[];
-                            final currentMenu = currentMenuList.isNotEmpty ? currentMenuList.first : null;
-
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: DropdownButtonFormField<int?>(
-                                    value: serata.menuId,
-                                    decoration: const InputDecoration(
-                                      prefixIcon: Icon(Icons.restaurant_menu_rounded),
-                                    ),
-                                    items: [
-                                      const DropdownMenuItem(
-                                        value: null,
-                                        child: Text('Nessun menù'),
-                                      ),
-                                      ...menus.map((menu) => DropdownMenuItem(
-                                            value: menu.id,
-                                            child: Text(menu.nome),
-                                          )),
-                                    ],
-                                    onChanged: (menuId) {
-                                      if (menuId != null) {
-                                        ref
-                                            .read(serateNotifierProvider.notifier)
-                                            .assignMenuToSerata(serataId, menuId);
-                                      }
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                IconButton(
-                                  icon: const Icon(Icons.add_rounded),
-                                  tooltip: 'Crea nuovo menù',
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: AppTheme.secondaryColor.withValues(alpha:0.1),
-                                    foregroundColor: AppTheme.secondaryColor,
-                                  ),
-                                  onPressed: () => context.go('/menu/new'),
-                                ),
-                                if (currentMenu != null)
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_rounded),
-                                    tooltip: 'Modifica menù',
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: AppTheme.successColor.withValues(alpha:0.1),
-                                      foregroundColor: AppTheme.successColor,
-                                    ),
-                                    onPressed: () => context.go('/menu/${currentMenu.id}'),
-                                  ),
-                              ],
-                            );
-                          },
-                          loading: () => const CircularProgressIndicator(),
-                          error: (_, __) => const Text('Errore caricamento menù', style: TextStyle(color: AppTheme.dangerColor)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Ordini',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: serata.menuId == null
-                          ? null
-                          : () async {
-                              final ordineId = await ref
-                                  .read(ordiniNotifierProvider(serataId).notifier)
-                                  .createOrdine();
-                              if (context.mounted) {
-                                context.go('/ordine/$serataId/$ordineId');
-                              }
-                            },
-                      icon: const Icon(Icons.add_rounded),
-                      label: const Text('Nuovo Ordine'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6),
+                      child: Text('/',
+                          style: TextStyle(
+                              color: AppTheme.textLight, fontSize: 14)),
+                    ),
+                    Text(
+                      serata.titolo,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    OutlinedButton.icon(
+                      onPressed: () => context.go('/resoconto/$serataId'),
+                      icon: const Icon(Icons.assessment_rounded, size: 16),
+                      label: const Text('Resoconto'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.textSecondary,
+                        side: const BorderSide(color: AppTheme.borderColor),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        textStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                ordiniAsync.when(
-                  data: (ordini) {
-                    if (ordini.isEmpty) {
-                      return Card(
-                        elevation: 0,
-                        color: Colors.grey.shade50,
-                        child: const Padding(
-                          padding: EdgeInsets.all(48),
-                          child: Center(
-                            child: Column(
+              ),
+
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Serata info + menu
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppTheme.borderColor),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              serata.titolo,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textPrimary,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
                               children: [
-                                Icon(Icons.receipt_long_rounded, size: 64, color: AppTheme.textLight),
-                                SizedBox(height: 16),
+                                const Icon(Icons.calendar_today_rounded,
+                                    size: 13, color: AppTheme.textSecondary),
+                                const SizedBox(width: 6),
                                 Text(
-                                  'Nessun ordine presente',
-                                  style: TextStyle(
-                                    fontSize: 18,
+                                  DateFormat('EEEE d MMMM yyyy', 'it_IT')
+                                      .format(serata.data),
+                                  style: const TextStyle(
+                                    fontSize: 13,
                                     color: AppTheme.textSecondary,
                                   ),
                                 ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Crea il primo ordine per iniziare',
-                                  style: TextStyle(color: AppTheme.textLight),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            const Divider(color: AppTheme.borderColor, height: 1),
+                            const SizedBox(height: 20),
+                            // Menu row
+                            Row(
+                              children: [
+                                const Text(
+                                  'Menù',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                menusAsync.when(
+                                  data: (menus) => Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 260,
+                                        child: DropdownButtonFormField<int?>(
+                                          initialValue: serata.menuId,
+                                          decoration: const InputDecoration(
+                                            prefixIcon: Icon(
+                                              Icons.restaurant_menu_rounded,
+                                              size: 18,
+                                            ),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 10),
+                                          ),
+                                          items: [
+                                            const DropdownMenuItem(
+                                              value: null,
+                                              child: Text('Nessun menù'),
+                                            ),
+                                            ...menus.map((m) =>
+                                                DropdownMenuItem(
+                                                  value: m.id,
+                                                  child: Text(m.nome),
+                                                )),
+                                          ],
+                                          onChanged: (menuId) {
+                                            if (menuId != null) {
+                                              ref
+                                                  .read(serateProvider
+                                                      .notifier)
+                                                  .assignMenuToSerata(
+                                                      serataId, menuId);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        icon: const Icon(Icons.add_rounded,
+                                            size: 18),
+                                        tooltip: 'Crea nuovo menù',
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: AppTheme.secondaryColor
+                                              .withValues(alpha: 0.08),
+                                          foregroundColor:
+                                              AppTheme.secondaryColor,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8)),
+                                        ),
+                                        onPressed: () =>
+                                            context.go('/menu/new'),
+                                      ),
+                                      if (serata.menuId != null) ...[
+                                        const SizedBox(width: 4),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit_rounded,
+                                              size: 18),
+                                          tooltip: 'Modifica menù',
+                                          style: IconButton.styleFrom(
+                                            backgroundColor: AppTheme
+                                                .successColor
+                                                .withValues(alpha: 0.08),
+                                            foregroundColor:
+                                                AppTheme.successColor,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8)),
+                                          ),
+                                          onPressed: () => context
+                                              .go('/menu/${serata.menuId}'),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  loading: () => const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  ),
+                                  error: (_, _) => const Text('Errore',
+                                      style: TextStyle(
+                                          color: AppTheme.dangerColor)),
                                 ),
                               ],
                             ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      // Ordini
+                      Row(
+                        children: [
+                          const Text(
+                            'Ordini',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (serata.menuId == null)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Text(
+                                'Assegna un menù per creare ordini',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary),
+                              ),
+                            ),
+                          FilledButton.icon(
+                            onPressed: serata.menuId == null
+                                ? null
+                                : () async {
+                                    final ordineId = await ref
+                                        .read(ordiniProvider(serataId)
+                                            .notifier)
+                                        .createOrdine();
+                                    if (context.mounted) {
+                                      context.go(
+                                          '/ordine/$serataId/$ordineId');
+                                    }
+                                  },
+                            icon: const Icon(Icons.add_rounded, size: 16),
+                            label: const Text('Nuovo Ordine'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppTheme.secondaryColor,
+                              disabledBackgroundColor: AppTheme.borderColor,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              textStyle: const TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      ordiniAsync.when(
+                        data: (ordini) {
+                          if (ordini.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(36),
+                              decoration: BoxDecoration(
+                                color: AppTheme.backgroundColor,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: AppTheme.borderColor),
+                              ),
+                              child: const Center(
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.receipt_long_rounded,
+                                        size: 36, color: AppTheme.textLight),
+                                    SizedBox(height: 12),
+                                    Text(
+                                      'Nessun ordine',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Crea il primo ordine per iniziare.',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.textLight),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppTheme.borderColor),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    color: AppTheme.backgroundColor,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 10),
+                                    child: const Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 64,
+                                          child:
+                                              Text('Ordine', style: _hStyle),
+                                        ),
+                                        SizedBox(width: 16),
+                                        SizedBox(
+                                          width: 60,
+                                          child: Text('Ora', style: _hStyle),
+                                        ),
+                                        SizedBox(width: 16),
+                                        Expanded(
+                                          child:
+                                              Text('Prodotti', style: _hStyle),
+                                        ),
+                                        SizedBox(
+                                          width: 90,
+                                          child:
+                                              Text('Totale', style: _hStyle),
+                                        ),
+                                        SizedBox(width: 48),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(
+                                      height: 1, color: AppTheme.borderColor),
+                                  ...ordini.asMap().entries.map((e) {
+                                    final i = e.key;
+                                    final ordine = e.value;
+                                    return Column(
+                                      children: [
+                                        if (i > 0)
+                                          const Divider(
+                                              height: 1,
+                                              color: AppTheme.borderColor),
+                                        _OrdineRow(
+                                          ordine: ordine,
+                                          onTap: () => context.go(
+                                              '/ordine/$serataId/${ordine.id}'),
+                                          onDelete: () =>
+                                              _showDeleteOrdineDialog(
+                                                  context, ref, ordine),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        loading: () => const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: CircularProgressIndicator(),
                           ),
                         ),
-                      );
-                    }
+                        error: (e, _) => Text('Errore: $e',
+                            style:
+                                const TextStyle(color: AppTheme.dangerColor)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Scaffold(
+        body: Center(
+          child: Text('Errore: $e',
+              style: const TextStyle(color: AppTheme.dangerColor)),
+        ),
+      ),
+    );
+  }
 
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: ordini.length,
-                      itemBuilder: (context, index) {
-                        final ordine = ordini[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(16),
-                            leading: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [AppTheme.successColor, AppTheme.successColor.withValues(alpha:0.7)],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '#${ordine.id}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              '${ordine.items.length} prodotti',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                DateFormat('HH:mm').format(ordine.dataOra),
-                                style: const TextStyle(color: AppTheme.textSecondary),
-                              ),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '€ ${ordine.totale.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.successColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline_rounded),
-                                  color: AppTheme.dangerColor,
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                        title: const Text('Conferma eliminazione'),
-                                        content: const Text('Sei sicuro di voler eliminare questo ordine?\n\nLe quantità dei prodotti verranno ripristinate.'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(),
-                                            child: const Text('Annulla'),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              ref
-                                                  .read(ordiniNotifierProvider(serataId).notifier)
-                                                  .deleteOrdine(ordine.id!);
-                                              Navigator.of(context).pop();
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppTheme.dangerColor,
-                                            ),
-                                            child: const Text('Elimina'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.chevron_right_rounded, color: AppTheme.textSecondary),
-                              ],
-                            ),
-                            onTap: () => context.go('/ordine/$serataId/${ordine.id}'),
-                          ),
-                        );
+  void _showDeleteOrdineDialog(
+      BuildContext context, WidgetRef ref, dynamic ordine) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: SizedBox(
+          width: 400,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Elimina ordine',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Le quantità dei prodotti verranno ripristinate.',
+                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Annulla'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () {
+                        ref
+                            .read(ordiniProvider(serataId).notifier)
+                            .deleteOrdine(ordine.id!);
+                        Navigator.pop(ctx);
                       },
-                    );
-                  },
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.dangerColor,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        textStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      child: const Text('Elimina'),
                     ),
-                  ),
-                  error: (error, _) => Center(
-                    child: Text(
-                      'Errore: $error',
-                      style: const TextStyle(color: AppTheme.dangerColor),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
-        );
-      },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        ),
       ),
-      error: (error, _) => Scaffold(
-        body: Center(
-          child: Text('Errore: $error', style: const TextStyle(color: AppTheme.dangerColor)),
+    );
+  }
+
+  static const _hStyle = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textSecondary,
+    letterSpacing: 0.5,
+  );
+}
+
+class _OrdineRow extends StatefulWidget {
+  final dynamic ordine;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+
+  const _OrdineRow({
+    required this.ordine,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  @override
+  State<_OrdineRow> createState() => _OrdineRowState();
+}
+
+class _OrdineRowState extends State<_OrdineRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          color: _hover ? AppTheme.backgroundColor : Colors.white,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 64,
+                child: Text(
+                  '#${widget.ordine.id}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.secondaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 60,
+                child: Text(
+                  DateFormat('HH:mm').format(widget.ordine.dataOra),
+                  style: const TextStyle(
+                      fontSize: 13, color: AppTheme.textSecondary),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  '${widget.ordine.items.length} prodotti',
+                  style: const TextStyle(
+                      fontSize: 13, color: AppTheme.textSecondary),
+                ),
+              ),
+              SizedBox(
+                width: 90,
+                child: Text(
+                  '€ ${widget.ordine.totale.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.successColor,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                  color: AppTheme.dangerColor,
+                  tooltip: 'Elimina',
+                  onPressed: widget.onDelete,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

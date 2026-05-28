@@ -6,172 +6,95 @@ part of 'ordini_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$ordiniNotifierHash() => r'db333111003eee105eb7735176eaa2c65bf0d52f';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$OrdiniNotifier
-    extends BuildlessAutoDisposeAsyncNotifier<List<models.Ordine>> {
-  late final int serataId;
-
-  FutureOr<List<models.Ordine>> build(
-    int serataId,
-  );
-}
-
-/// See also [OrdiniNotifier].
 @ProviderFor(OrdiniNotifier)
-const ordiniNotifierProvider = OrdiniNotifierFamily();
+final ordiniProvider = OrdiniNotifierFamily._();
 
-/// See also [OrdiniNotifier].
-class OrdiniNotifierFamily extends Family<AsyncValue<List<models.Ordine>>> {
-  /// See also [OrdiniNotifier].
-  const OrdiniNotifierFamily();
+final class OrdiniNotifierProvider
+    extends $AsyncNotifierProvider<OrdiniNotifier, List<models.Ordine>> {
+  OrdiniNotifierProvider._({
+    required OrdiniNotifierFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'ordiniProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [OrdiniNotifier].
-  OrdiniNotifierProvider call(
-    int serataId,
-  ) {
-    return OrdiniNotifierProvider(
-      serataId,
-    );
+  @override
+  String debugGetCreateSourceHash() => _$ordiniNotifierHash();
+
+  @override
+  String toString() {
+    return r'ordiniProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  OrdiniNotifierProvider getProviderOverride(
-    covariant OrdiniNotifierProvider provider,
-  ) {
-    return call(
-      provider.serataId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'ordiniNotifierProvider';
-}
-
-/// See also [OrdiniNotifier].
-class OrdiniNotifierProvider extends AutoDisposeAsyncNotifierProviderImpl<
-    OrdiniNotifier, List<models.Ordine>> {
-  /// See also [OrdiniNotifier].
-  OrdiniNotifierProvider(
-    int serataId,
-  ) : this._internal(
-          () => OrdiniNotifier()..serataId = serataId,
-          from: ordiniNotifierProvider,
-          name: r'ordiniNotifierProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$ordiniNotifierHash,
-          dependencies: OrdiniNotifierFamily._dependencies,
-          allTransitiveDependencies:
-              OrdiniNotifierFamily._allTransitiveDependencies,
-          serataId: serataId,
-        );
-
-  OrdiniNotifierProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.serataId,
-  }) : super.internal();
-
-  final int serataId;
-
-  @override
-  FutureOr<List<models.Ordine>> runNotifierBuild(
-    covariant OrdiniNotifier notifier,
-  ) {
-    return notifier.build(
-      serataId,
-    );
-  }
-
-  @override
-  Override overrideWith(OrdiniNotifier Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: OrdiniNotifierProvider._internal(
-        () => create()..serataId = serataId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        serataId: serataId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeAsyncNotifierProviderElement<OrdiniNotifier, List<models.Ordine>>
-      createElement() {
-    return _OrdiniNotifierProviderElement(this);
-  }
+  OrdiniNotifier create() => OrdiniNotifier();
 
   @override
   bool operator ==(Object other) {
-    return other is OrdiniNotifierProvider && other.serataId == serataId;
+    return other is OrdiniNotifierProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, serataId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin OrdiniNotifierRef
-    on AutoDisposeAsyncNotifierProviderRef<List<models.Ordine>> {
-  /// The parameter `serataId` of this provider.
-  int get serataId;
-}
+String _$ordiniNotifierHash() => r'aa81837d3fb6e4d76cd2c935880be5b5d4ad29b7';
 
-class _OrdiniNotifierProviderElement
-    extends AutoDisposeAsyncNotifierProviderElement<OrdiniNotifier,
-        List<models.Ordine>> with OrdiniNotifierRef {
-  _OrdiniNotifierProviderElement(super.provider);
+final class OrdiniNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          OrdiniNotifier,
+          AsyncValue<List<models.Ordine>>,
+          List<models.Ordine>,
+          FutureOr<List<models.Ordine>>,
+          int
+        > {
+  OrdiniNotifierFamily._()
+    : super(
+        retry: null,
+        name: r'ordiniProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  OrdiniNotifierProvider call(int serataId) =>
+      OrdiniNotifierProvider._(argument: serataId, from: this);
 
   @override
-  int get serataId => (origin as OrdiniNotifierProvider).serataId;
+  String toString() => r'ordiniProvider';
 }
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+
+abstract class _$OrdiniNotifier extends $AsyncNotifier<List<models.Ordine>> {
+  late final _$args = ref.$arg as int;
+  int get serataId => _$args;
+
+  FutureOr<List<models.Ordine>> build(int serataId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<models.Ordine>>, List<models.Ordine>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<models.Ordine>>, List<models.Ordine>>,
+              AsyncValue<List<models.Ordine>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
+  }
+}

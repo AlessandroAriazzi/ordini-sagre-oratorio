@@ -28,74 +28,75 @@ class _MainLayoutState extends State<MainLayout> {
           // Sidebar Navigation
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: isExpanded ? 280 : 80,
+            width: isExpanded ? 260 : 68,
             child: Container(
               decoration: const BoxDecoration(
                 color: AppTheme.navbarBackground,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(2, 0),
-                  ),
-                ],
+                border: Border(
+                  right: BorderSide(color: Color(0xFF1E293B), width: 1),
+                ),
               ),
               child: Column(
                 children: [
-                  // Header
-                  Container(
-                    height: 80,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.secondaryColor,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.restaurant,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        if (isExpanded) ...[
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Festa Ordini',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Gestionale',
-                                  style: TextStyle(
-                                    color: AppTheme.textLight,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                  // Header / Brand
+                  SizedBox(
+                    height: 72,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppTheme.secondaryColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.restaurant_rounded,
+                              color: Colors.white,
+                              size: 20,
                             ),
                           ),
+                          if (isExpanded) ...[
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Festa Ordini',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Gestionale',
+                                    style: TextStyle(
+                                      color: Color(0xFF64748B),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                  
-                  const Divider(color: AppTheme.navbarHover, height: 1),
-                  
+
+                  const Divider(color: Color(0xFF1E293B), height: 1),
+
                   // Navigation Items
                   Expanded(
                     child: ListView(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       children: [
                         _NavItem(
                           icon: Icons.home_rounded,
@@ -108,7 +109,9 @@ class _MainLayoutState extends State<MainLayout> {
                           icon: Icons.event_rounded,
                           label: 'Serate',
                           isSelected: widget.currentPath.startsWith('/serate') ||
-                              widget.currentPath.startsWith('/serata/'),
+                              widget.currentPath.startsWith('/serata/') ||
+                              widget.currentPath.startsWith('/ordine/') ||
+                              widget.currentPath.startsWith('/resoconto/'),
                           isExpanded: isExpanded,
                           onTap: () => context.go('/serate'),
                         ),
@@ -122,36 +125,44 @@ class _MainLayoutState extends State<MainLayout> {
                       ],
                     ),
                   ),
-                  
-                  const Divider(color: AppTheme.navbarHover, height: 1),
 
-                  // Settings Item
-                  _NavItem(
-                    icon: Icons.settings_rounded,
-                    label: 'Impostazioni',
-                    isSelected: widget.currentPath == '/settings',
-                    isExpanded: isExpanded,
-                    onTap: () => context.go('/settings'),
+                  const Divider(color: Color(0xFF1E293B), height: 1),
+
+                  // Settings nav item (bottom)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: _NavItem(
+                      icon: Icons.settings_rounded,
+                      label: 'Impostazioni',
+                      isSelected: widget.currentPath == '/settings',
+                      isExpanded: isExpanded,
+                      onTap: () => context.go('/settings'),
+                    ),
                   ),
 
-                  const Divider(color: AppTheme.navbarHover, height: 1),
-                  
+                  const Divider(color: Color(0xFF1E293B), height: 1),
+
                   // Toggle Button
                   InkWell(
                     onTap: () => setState(() => isExpanded = !isExpanded),
-                    child: Container(
-                      height: 60,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SizedBox(
+                      height: 52,
                       child: Row(
-                        mainAxisAlignment: isExpanded 
-                            ? MainAxisAlignment.end 
+                        mainAxisAlignment: isExpanded
+                            ? MainAxisAlignment.end
                             : MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            isExpanded 
-                                ? Icons.chevron_left_rounded 
-                                : Icons.chevron_right_rounded,
-                            color: Colors.white,
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: isExpanded ? 16 : 0,
+                            ),
+                            child: Icon(
+                              isExpanded
+                                  ? Icons.chevron_left_rounded
+                                  : Icons.chevron_right_rounded,
+                              color: const Color(0xFF64748B),
+                              size: 20,
+                            ),
                           ),
                         ],
                       ),
@@ -161,7 +172,7 @@ class _MainLayoutState extends State<MainLayout> {
               ),
             ),
           ),
-          
+
           // Main Content
           Expanded(
             child: widget.child,
@@ -196,47 +207,73 @@ class _NavItemState extends State<_NavItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => isHovered = true),
-        onExit: (_) => setState(() => isHovered = false),
-        child: InkWell(
-          onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: widget.isSelected
-                  ? AppTheme.navbarSelected
-                  : isHovered
-                      ? AppTheme.navbarHover
-                      : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Icon(
-                  widget.icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                if (widget.isExpanded) ...[
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      widget.label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: InkWell(
+        onTap: widget.onTap,
+        child: SizedBox(
+          height: 44,
+          child: Row(
+            children: [
+              // Left indicator bar
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 3,
+                height: widget.isSelected ? 44 : 0,
+                decoration: const BoxDecoration(
+                  color: AppTheme.navbarSelected,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(3),
+                    bottomRight: Radius.circular(3),
                   ),
-                ],
-              ],
-            ),
+                ),
+              ),
+              // Item content
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: widget.isSelected
+                        ? AppTheme.navbarSelected.withValues(alpha: 0.12)
+                        : isHovered
+                            ? const Color(0xFF1E293B)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        widget.icon,
+                        color: widget.isSelected
+                            ? AppTheme.navbarSelected
+                            : const Color(0xFF94A3B8),
+                        size: 20,
+                      ),
+                      if (widget.isExpanded) ...[
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            widget.label,
+                            style: TextStyle(
+                              color: widget.isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF94A3B8),
+                              fontSize: 14,
+                              fontWeight: widget.isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              letterSpacing: -0.1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

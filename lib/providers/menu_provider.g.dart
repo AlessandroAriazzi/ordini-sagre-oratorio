@@ -6,171 +6,125 @@ part of 'menu_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$menuByIdHash() => r'a23fcc3c91687775220a009a9a835e063b99aa14';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+@ProviderFor(MenusNotifier)
+final menusProvider = MenusNotifierProvider._();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// See also [menuById].
-@ProviderFor(menuById)
-const menuByIdProvider = MenuByIdFamily();
-
-/// See also [menuById].
-class MenuByIdFamily extends Family<AsyncValue<models.Menu?>> {
-  /// See also [menuById].
-  const MenuByIdFamily();
-
-  /// See also [menuById].
-  MenuByIdProvider call(
-    int menuId,
-  ) {
-    return MenuByIdProvider(
-      menuId,
-    );
-  }
-
-  @override
-  MenuByIdProvider getProviderOverride(
-    covariant MenuByIdProvider provider,
-  ) {
-    return call(
-      provider.menuId,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'menuByIdProvider';
-}
-
-/// See also [menuById].
-class MenuByIdProvider extends AutoDisposeFutureProvider<models.Menu?> {
-  /// See also [menuById].
-  MenuByIdProvider(
-    int menuId,
-  ) : this._internal(
-          (ref) => menuById(
-            ref as MenuByIdRef,
-            menuId,
-          ),
-          from: menuByIdProvider,
-          name: r'menuByIdProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$menuByIdHash,
-          dependencies: MenuByIdFamily._dependencies,
-          allTransitiveDependencies: MenuByIdFamily._allTransitiveDependencies,
-          menuId: menuId,
-        );
-
-  MenuByIdProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.menuId,
-  }) : super.internal();
-
-  final int menuId;
-
-  @override
-  Override overrideWith(
-    FutureOr<models.Menu?> Function(MenuByIdRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: MenuByIdProvider._internal(
-        (ref) => create(ref as MenuByIdRef),
-        from: from,
-        name: null,
+final class MenusNotifierProvider
+    extends $AsyncNotifierProvider<MenusNotifier, List<models.Menu>> {
+  MenusNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'menusProvider',
+        isAutoDispose: true,
         dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        menuId: menuId,
-      ),
-    );
-  }
+        $allTransitiveDependencies: null,
+      );
 
   @override
-  AutoDisposeFutureProviderElement<models.Menu?> createElement() {
-    return _MenuByIdProviderElement(this);
-  }
+  String debugGetCreateSourceHash() => _$menusNotifierHash();
 
+  @$internal
   @override
-  bool operator ==(Object other) {
-    return other is MenuByIdProvider && other.menuId == menuId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, menuId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin MenuByIdRef on AutoDisposeFutureProviderRef<models.Menu?> {
-  /// The parameter `menuId` of this provider.
-  int get menuId;
-}
-
-class _MenuByIdProviderElement
-    extends AutoDisposeFutureProviderElement<models.Menu?> with MenuByIdRef {
-  _MenuByIdProviderElement(super.provider);
-
-  @override
-  int get menuId => (origin as MenuByIdProvider).menuId;
+  MenusNotifier create() => MenusNotifier();
 }
 
 String _$menusNotifierHash() => r'5cc64278cb6b5e565d55687bee35fa66ab0ad2f1';
 
-/// See also [MenusNotifier].
-@ProviderFor(MenusNotifier)
-final menusNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<MenusNotifier, List<models.Menu>>.internal(
-  MenusNotifier.new,
-  name: r'menusNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$menusNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+abstract class _$MenusNotifier extends $AsyncNotifier<List<models.Menu>> {
+  FutureOr<List<models.Menu>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<models.Menu>>, List<models.Menu>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<models.Menu>>, List<models.Menu>>,
+              AsyncValue<List<models.Menu>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
 
-typedef _$MenusNotifier = AutoDisposeAsyncNotifier<List<models.Menu>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(menuById)
+final menuByIdProvider = MenuByIdFamily._();
+
+final class MenuByIdProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<models.Menu?>,
+          models.Menu?,
+          FutureOr<models.Menu?>
+        >
+    with $FutureModifier<models.Menu?>, $FutureProvider<models.Menu?> {
+  MenuByIdProvider._({
+    required MenuByIdFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'menuByIdProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$menuByIdHash();
+
+  @override
+  String toString() {
+    return r'menuByIdProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<models.Menu?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<models.Menu?> create(Ref ref) {
+    final argument = this.argument as int;
+    return menuById(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MenuByIdProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$menuByIdHash() => r'a23fcc3c91687775220a009a9a835e063b99aa14';
+
+final class MenuByIdFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<models.Menu?>, int> {
+  MenuByIdFamily._()
+    : super(
+        retry: null,
+        name: r'menuByIdProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  MenuByIdProvider call(int menuId) =>
+      MenuByIdProvider._(argument: menuId, from: this);
+
+  @override
+  String toString() => r'menuByIdProvider';
+}
