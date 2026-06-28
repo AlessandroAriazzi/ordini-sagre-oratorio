@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -10,7 +11,19 @@ import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import '../providers/ordini_provider.dart';
 import '../providers/serate_provider.dart';
-import '../theme.dart';
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const _surface      = Color(0xFFF7F9FB);
+const _white        = Color(0xFFFFFFFF);
+const _onSurface    = Color(0xFF191C1E);
+const _onSurfaceVar = Color(0xFF45464D);
+const _outline      = Color(0xFF76777D);
+const _outlineVar   = Color(0xFFC6C6CD);
+const _secondary    = Color(0xFF006C49);
+const _danger       = Color(0xFFBA1A1A);
+const _warning      = Color(0xFFF59E0B);
+const _success      = Color(0xFF10B981);
+// ──────────────────────────────────────────────────────────────────────────────
 
 class ResocontoScreen extends ConsumerWidget {
   final int serataId;
@@ -194,7 +207,7 @@ class ResocontoScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('PDF salvato: $savePath'),
-            backgroundColor: AppTheme.successColor,
+            backgroundColor: _success,
             duration: const Duration(seconds: 6),
           ),
         );
@@ -204,7 +217,7 @@ class ResocontoScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Errore esportazione: $e'),
-            backgroundColor: AppTheme.dangerColor,
+            backgroundColor: _danger,
           ),
         );
       }
@@ -217,13 +230,17 @@ class ResocontoScreen extends ConsumerWidget {
     final serateAsync = ref.watch(serateProvider);
 
     return Scaffold(
+      backgroundColor: _surface,
       body: ordiniAsync.when(
         data: (ordini) {
           return serateAsync.when(
             data: (serate) {
               final serata = serate.where((s) => s.id == serataId).firstOrNull;
               if (serata == null) {
-                return const Center(child: Text('Serata non trovata'));
+                return Center(
+                  child: Text('Serata non trovata',
+                      style: GoogleFonts.inter(fontSize: 13, color: _onSurfaceVar)),
+                );
               }
 
               final totaleGenerale = ordini.fold(0.0, (sum, o) => sum + o.totale);
@@ -255,60 +272,62 @@ class ResocontoScreen extends ConsumerWidget {
 
               return Column(
                 children: [
-                  // Breadcrumb header
+                  // ── Header ────────────────────────────────────────────────
                   Container(
+                    padding: const EdgeInsets.fromLTRB(28, 18, 28, 14),
                     decoration: const BoxDecoration(
-                      color: Colors.white,
-                      border: Border(bottom: BorderSide(color: AppTheme.borderColor)),
+                      color: _white,
+                      border: Border(bottom: BorderSide(color: _outlineVar)),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                     child: Row(
                       children: [
                         InkWell(
-                          onTap: () => context.go('/serata/$serataId'),
-                          borderRadius: BorderRadius.circular(6),
+                          onTap: () => context.go('/serate'),
+                          borderRadius: BorderRadius.circular(4),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.chevron_left_rounded, size: 16, color: AppTheme.textSecondary),
+                                const Icon(Icons.chevron_left_rounded, size: 16, color: _onSurfaceVar),
                                 const SizedBox(width: 4),
                                 Text(
                                   serata.titolo,
-                                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                                  style: GoogleFonts.inter(fontSize: 13, color: _onSurfaceVar),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6),
-                          child: Text('/', style: TextStyle(color: AppTheme.textLight, fontSize: 13)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text('/', style: GoogleFonts.inter(color: _outline, fontSize: 13)),
                         ),
-                        const Text(
+                        Text(
                           'Resoconto',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: _onSurface),
                         ),
                         const Spacer(),
                         FilledButton.icon(
                           onPressed: () => _esportaPDF(context, ref),
                           icon: const Icon(Icons.picture_as_pdf_rounded, size: 15),
-                          label: const Text('Esporta PDF'),
+                          label: Text('Esporta PDF',
+                              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500)),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.secondaryColor,
+                            backgroundColor: Colors.black,
+                            foregroundColor: _white,
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Content
+                  // ── Content ───────────────────────────────────────────────
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(32),
+                      padding: const EdgeInsets.all(28),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -320,7 +339,7 @@ class ResocontoScreen extends ConsumerWidget {
                                   icon: Icons.receipt_long_rounded,
                                   label: 'Ordini totali',
                                   value: '$numOrdini',
-                                  color: AppTheme.secondaryColor,
+                                  color: _secondary,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -329,7 +348,7 @@ class ResocontoScreen extends ConsumerWidget {
                                   icon: Icons.inventory_2_rounded,
                                   label: 'Prodotti venduti',
                                   value: '$numProdottiTotali',
-                                  color: AppTheme.warningColor,
+                                  color: _warning,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -338,118 +357,103 @@ class ResocontoScreen extends ConsumerWidget {
                                   icon: Icons.euro_rounded,
                                   label: 'Incasso totale',
                                   value: '€${totaleGenerale.toStringAsFixed(2)}',
-                                  color: AppTheme.successColor,
+                                  color: _success,
                                 ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 28),
 
                           // Product stats table
                           if (prodottiStats.isNotEmpty) ...[
-                            const Text(
+                            Text(
                               'Statistiche prodotti',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                              style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.4,
+                                  color: _onSurfaceVar),
                             ),
                             const SizedBox(height: 12),
                             Container(
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppTheme.borderColor),
-                                borderRadius: BorderRadius.circular(10),
+                                color: _white,
+                                border: Border.all(color: _outlineVar),
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      color: AppTheme.backgroundColor,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                      child: const Row(
-                                        children: [
-                                          Expanded(flex: 3, child: Text('Prodotto', style: _headerStyle)),
-                                          SizedBox(width: 100, child: Text('Quantità', style: _headerStyle, textAlign: TextAlign.center)),
-                                          SizedBox(width: 120, child: Text('Prezzo unit.', style: _headerStyle, textAlign: TextAlign.right)),
-                                          SizedBox(width: 120, child: Text('Totale', style: _headerStyle, textAlign: TextAlign.right)),
-                                        ],
-                                      ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    color: _surface,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        Expanded(flex: 3, child: Text('PRODOTTO', style: _thSt)),
+                                        SizedBox(width: 100, child: Text('QUANTITÀ', style: _thSt, textAlign: TextAlign.center)),
+                                        SizedBox(width: 130, child: Text('PREZZO UNIT.', style: _thSt, textAlign: TextAlign.right)),
+                                        SizedBox(width: 130, child: Text('TOTALE', style: _thSt, textAlign: TextAlign.right)),
+                                      ],
                                     ),
-                                    const Divider(height: 1, color: AppTheme.borderColor),
-                                    ...prodottiStats.entries.toList().asMap().entries.map((e) {
-                                      final isLast = e.key == prodottiStats.length - 1;
-                                      final entry = e.value;
-                                      return Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  flex: 3,
-                                                  child: Text(
-                                                    entry.key,
-                                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppTheme.textPrimary),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 100,
-                                                  child: Text(
-                                                    '${entry.value['quantita']}',
-                                                    style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 120,
-                                                  child: Text(
-                                                    '€${entry.value['prezzo'].toStringAsFixed(2)}',
-                                                    style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                                                    textAlign: TextAlign.right,
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 120,
-                                                  child: Text(
-                                                    '€${entry.value['totale'].toStringAsFixed(2)}',
-                                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.successColor),
-                                                    textAlign: TextAlign.right,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          if (!isLast) const Divider(height: 1, color: AppTheme.borderColor),
-                                        ],
-                                      );
-                                    }),
-                                  ],
-                                ),
+                                  ),
+                                  const Divider(height: 1, color: _outlineVar),
+                                  ...prodottiStats.entries.toList().asMap().entries.map((e) {
+                                    final isLast = e.key == prodottiStats.length - 1;
+                                    final entry = e.value;
+                                    return Column(
+                                      children: [
+                                        _ProdottoStatRow(
+                                          nome: entry.key,
+                                          quantita: entry.value['quantita'] as int,
+                                          prezzo: entry.value['prezzo'] as double,
+                                          totale: entry.value['totale'] as double,
+                                        ),
+                                        if (!isLast) const Divider(height: 1, color: _outlineVar),
+                                      ],
+                                    );
+                                  }),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 28),
                           ],
 
-                          // Orders accordion
+                          // Orders list
                           if (ordini.isNotEmpty) ...[
-                            const Text(
+                            Text(
                               'Dettaglio ordini',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                              style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.4,
+                                  color: _onSurfaceVar),
                             ),
                             const SizedBox(height: 12),
                             Container(
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppTheme.borderColor),
-                                borderRadius: BorderRadius.circular(10),
+                                color: _white,
+                                border: Border.all(color: _outlineVar),
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Column(
-                                  children: ordini.asMap().entries.map<Widget>((e) {
+                              child: Column(
+                                children: [
+                                  Container(
+                                    color: _surface,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(width: 80, child: Text('ORDINE', style: _thSt)),
+                                        SizedBox(width: 70, child: Text('ORA', style: _thSt)),
+                                        Expanded(child: Text('PRODOTTI', style: _thSt)),
+                                        SizedBox(width: 120, child: Text('TOTALE', style: _thSt, textAlign: TextAlign.right)),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(height: 1, color: _outlineVar),
+                                  ...ordini.asMap().entries.map<Widget>((e) {
                                     final i = e.key;
                                     final ordine = e.value;
                                     return Column(
                                       children: [
-                                        if (i > 0) const Divider(height: 1, color: AppTheme.borderColor),
+                                        if (i > 0) const Divider(height: 1, color: _outlineVar),
                                         Theme(
                                           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                                           child: ExpansionTile(
@@ -458,52 +462,67 @@ class ResocontoScreen extends ConsumerWidget {
                                               width: 32,
                                               height: 32,
                                               decoration: BoxDecoration(
-                                                color: AppTheme.secondaryColor.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(6),
+                                                color: _secondary.withValues(alpha: 0.08),
+                                                border: Border.all(color: _secondary.withValues(alpha: 0.2)),
                                               ),
                                               child: Center(
                                                 child: Text(
-                                                  '#${ordine.id}',
-                                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.secondaryColor),
+                                                  '#${ordine.numero}',
+                                                  style: GoogleFonts.jetBrainsMono(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: _secondary),
                                                 ),
                                               ),
                                             ),
                                             title: Text(
-                                              'Ordine #${ordine.id}',
-                                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                                              'Ordine #${ordine.numero}',
+                                              style: GoogleFonts.inter(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: _onSurface),
                                             ),
                                             subtitle: Text(
                                               DateFormat('HH:mm').format(ordine.dataOra),
-                                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                              style: GoogleFonts.inter(fontSize: 12, color: _onSurfaceVar),
                                             ),
                                             trailing: Text(
                                               '€${ordine.totale.toStringAsFixed(2)}',
-                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.successColor),
+                                              style: GoogleFonts.jetBrainsMono(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: _success),
                                             ),
                                             children: [
                                               Container(
-                                                color: AppTheme.backgroundColor,
+                                                color: _surface,
                                                 child: Column(
                                                   children: [
-                                                    const Divider(height: 1, color: AppTheme.borderColor),
+                                                    const Divider(height: 1, color: _outlineVar),
                                                     ...ordine.items.map<Widget>((item) {
                                                       return Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 8),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 10),
                                                         child: Row(
                                                           children: [
                                                             Expanded(
-                                                              child: Text(item.prodottoNome, style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary)),
+                                                              child: Text(item.prodottoNome,
+                                                                  style: GoogleFonts.inter(
+                                                                      fontSize: 13, color: _onSurface)),
                                                             ),
                                                             Text(
                                                               '${item.quantita}× €${item.prezzoUnitario.toStringAsFixed(2)}',
-                                                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                                              style: GoogleFonts.inter(
+                                                                  fontSize: 12, color: _onSurfaceVar),
                                                             ),
                                                             const SizedBox(width: 16),
                                                             SizedBox(
                                                               width: 80,
                                                               child: Text(
                                                                 '€${item.totale.toStringAsFixed(2)}',
-                                                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                                                                style: GoogleFonts.jetBrainsMono(
+                                                                    fontSize: 13,
+                                                                    fontWeight: FontWeight.w600,
+                                                                    color: _onSurface),
                                                                 textAlign: TextAlign.right,
                                                               ),
                                                             ),
@@ -520,36 +539,42 @@ class ResocontoScreen extends ConsumerWidget {
                                         ),
                                       ],
                                     );
-                                  }).toList(),
-                                ),
+                                  }),
+                                ],
                               ),
                             ),
                           ],
 
                           if (ordini.isEmpty)
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(48),
+                            Container(
+                              padding: const EdgeInsets.all(48),
+                              decoration: BoxDecoration(
+                                color: _white,
+                                border: Border.all(color: _outlineVar),
+                              ),
+                              child: Center(
                                 child: Column(
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(20),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.backgroundColor,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: AppTheme.borderColor),
+                                        color: _surface,
+                                        border: Border.all(color: _outlineVar),
                                       ),
-                                      child: const Icon(Icons.receipt_long_rounded, size: 36, color: AppTheme.textLight),
+                                      child: const Icon(Icons.receipt_long_rounded, size: 36, color: _outline),
                                     ),
                                     const SizedBox(height: 16),
-                                    const Text(
+                                    Text(
                                       'Nessun ordine registrato',
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                                      style: GoogleFonts.inter(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: _onSurface),
                                     ),
                                     const SizedBox(height: 4),
-                                    const Text(
+                                    Text(
                                       'Gli ordini appariranno qui una volta creati.',
-                                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                                      style: GoogleFonts.inter(fontSize: 13, color: _onSurfaceVar),
                                     ),
                                   ],
                                 ),
@@ -563,22 +588,21 @@ class ResocontoScreen extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => const Center(child: Text('Errore caricamento serata')),
+            error: (_, _) => Center(
+                child: Text('Errore caricamento serata',
+                    style: GoogleFonts.inter(color: _danger))),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Errore: $error')),
+        error: (error, _) => Center(
+            child: Text('Errore: $error',
+                style: GoogleFonts.inter(color: _danger))),
       ),
     );
   }
-
-  static const _headerStyle = TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w600,
-    color: AppTheme.textSecondary,
-    letterSpacing: 0.5,
-  );
 }
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
 
 class _KpiCard extends StatelessWidget {
   final IconData icon;
@@ -598,9 +622,8 @@ class _KpiCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppTheme.borderColor),
+        color: _white,
+        border: Border.all(color: _outlineVar),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,19 +632,104 @@ class _KpiCard extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: color.withValues(alpha: 0.15)),
             ),
             child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(height: 16),
           Text(
             value,
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: color, letterSpacing: -0.5),
+            style: GoogleFonts.jetBrainsMono(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: color,
+                letterSpacing: -0.5),
           ),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+          Text(label,
+              style: GoogleFonts.inter(fontSize: 13, color: _onSurfaceVar)),
         ],
       ),
     );
   }
 }
+
+// ─── Prodotto Stat Row ────────────────────────────────────────────────────────
+
+class _ProdottoStatRow extends StatefulWidget {
+  final String nome;
+  final int quantita;
+  final double prezzo;
+  final double totale;
+
+  const _ProdottoStatRow({
+    required this.nome,
+    required this.quantita,
+    required this.prezzo,
+    required this.totale,
+  });
+
+  @override
+  State<_ProdottoStatRow> createState() => _ProdottoStatRowState();
+}
+
+class _ProdottoStatRowState extends State<_ProdottoStatRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        color: _hover ? _surface : _white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Text(widget.nome,
+                  style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: _onSurface)),
+            ),
+            SizedBox(
+              width: 100,
+              child: Text('${widget.quantita}',
+                  style: GoogleFonts.jetBrainsMono(
+                      fontSize: 13, color: _onSurfaceVar),
+                  textAlign: TextAlign.center),
+            ),
+            SizedBox(
+              width: 130,
+              child: Text('€${widget.prezzo.toStringAsFixed(2)}',
+                  style: GoogleFonts.jetBrainsMono(
+                      fontSize: 13, color: _onSurfaceVar),
+                  textAlign: TextAlign.right),
+            ),
+            SizedBox(
+              width: 130,
+              child: Text('€${widget.totale.toStringAsFixed(2)}',
+                  style: GoogleFonts.jetBrainsMono(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _success),
+                  textAlign: TextAlign.right),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+TextStyle get _thSt => GoogleFonts.jetBrainsMono(
+      fontSize: 11,
+      fontWeight: FontWeight.w500,
+      color: _onSurfaceVar,
+      letterSpacing: 0.5,
+    );

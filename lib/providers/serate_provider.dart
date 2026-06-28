@@ -18,21 +18,23 @@ class SerateNotifier extends _$SerateNotifier {
   Future<List<models.Serata>> build() async {
     final db = ref.watch(databaseProvider);
     final serate = await db.getAllSerate();
-    return serate.map((s) => models.Serata(
-      id: s.id,
-      titolo: s.titolo,
-      data: s.data,
-      menuId: s.menuId,
-    )).toList();
+    return serate
+        .map((s) => models.Serata(
+              id: s.id,
+              titolo: s.titolo,
+              data: s.data,
+            ))
+        .toList();
   }
 
-  Future<void> addSerata(String titolo, DateTime data) async {
+  Future<int> addSerata(String titolo, DateTime data) async {
     final db = ref.read(databaseProvider);
-    await db.insertSerata(SerateCompanion(
+    final id = await db.insertSerata(SerateCompanion(
       titolo: drift.Value(titolo),
       data: drift.Value(data),
     ));
     ref.invalidateSelf();
+    return id;
   }
 
   Future<void> updateSerata(models.Serata serata) async {
@@ -41,7 +43,6 @@ class SerateNotifier extends _$SerateNotifier {
       id: drift.Value(serata.id!),
       titolo: drift.Value(serata.titolo),
       data: drift.Value(serata.data),
-      menuId: drift.Value(serata.menuId),
     ));
     ref.invalidateSelf();
   }
@@ -49,18 +50,6 @@ class SerateNotifier extends _$SerateNotifier {
   Future<void> deleteSerata(int id) async {
     final db = ref.read(databaseProvider);
     await db.deleteSerata(id);
-    ref.invalidateSelf();
-  }
-
-  Future<void> assignMenuToSerata(int serataId, int menuId) async {
-    final db = ref.read(databaseProvider);
-    final serata = await db.getSerata(serataId);
-    await db.updateSerata(SerateCompanion(
-      id: drift.Value(serataId),
-      titolo: drift.Value(serata.titolo),
-      data: drift.Value(serata.data),
-      menuId: drift.Value(menuId),
-    ));
     ref.invalidateSelf();
   }
 }

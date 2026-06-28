@@ -6,11 +6,14 @@
 
 #include "generated_plugin_registrant.h"
 
+#include <flutter_localization/flutter_localization_plugin_c_api.h>
 #include <flutter_thermal_printer/flutter_thermal_printer_plugin_c_api.h>
 #include <printing/printing_plugin.h>
 #include <universal_ble/universal_ble_plugin_c_api.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
+  FlutterLocalizationPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterLocalizationPluginCApi"));
   FlutterThermalPrinterPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterThermalPrinterPluginCApi"));
   PrintingPluginRegisterWithRegistrar(

@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+// ── Design token colors (from DESIGN.md) ──────────────────────────────────────
+
+
+const _containerLow   = Color(0xFFF2F4F6);
+const _container      = Color(0xFFECEEF0);   // sidebar bg
+const _containerHigh  = Color(0xFFE6E8EA);   // hover
+
+const _onSurface      = Color(0xFF191C1E);   // primary text
+const _onSurfaceVar   = Color(0xFF45464D);   // secondary text
+const _outlineVar     = Color(0xFFC6C6CD);   // dividers
+const _primary        = Color(0xFF000000);   // active bar / buttons
+// ──────────────────────────────────────────────────────────────────────────────
 
 class MainLayout extends StatefulWidget {
   final Widget child;
@@ -23,144 +35,144 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _containerLow,
       body: Row(
         children: [
-          // Sidebar Navigation
+          // ── Sidebar ─────────────────────────────────────────────────────────
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: isExpanded ? 260 : 68,
             child: Container(
               decoration: const BoxDecoration(
-                color: AppTheme.navbarBackground,
+                color: _container,
                 border: Border(
-                  right: BorderSide(color: Color(0xFF1E293B), width: 1),
+                  right: BorderSide(color: _outlineVar, width: 1),
                 ),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header / Brand
-                  SizedBox(
-                    height: 72,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
+                  // Brand header
+                  if (isExpanded)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppTheme.secondaryColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.restaurant_rounded,
-                              color: Colors.white,
-                              size: 20,
+                          Text(
+                            'POS Master',
+                            style: GoogleFonts.inter(
+                              color: _onSurface,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
                             ),
                           ),
-                          if (isExpanded) ...[
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Festa Ordini',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -0.2,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Gestionale',
-                                    style: TextStyle(
-                                      color: Color(0xFF64748B),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Terminal #01',
+                            style: GoogleFonts.inter(
+                              color: _onSurfaceVar,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
                             ),
-                          ],
+                          ),
                         ],
                       ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      child: Center(
+                        child: Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: _primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.restaurant_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
 
-                  const Divider(color: Color(0xFF1E293B), height: 1),
+                  
 
-                  // Navigation Items
+                  // Nav items
                   Expanded(
                     child: ListView(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
                       children: [
                         _NavItem(
-                          icon: Icons.home_rounded,
-                          label: 'Home',
-                          isSelected: widget.currentPath == '/',
+                          icon: Icons.receipt_long_rounded,
+                          label: 'Ordini',
+                          isSelected: widget.currentPath.startsWith('/ordini') ||
+                              widget.currentPath.startsWith('/ordine/'),
                           isExpanded: isExpanded,
-                          onTap: () => context.go('/'),
+                          onTap: () => context.go('/ordini'),
                         ),
                         _NavItem(
-                          icon: Icons.event_rounded,
-                          label: 'Serate',
+                          icon: Icons.calendar_today_outlined,
+                          label: 'Gestione Serate',
                           isSelected: widget.currentPath.startsWith('/serate') ||
                               widget.currentPath.startsWith('/serata/') ||
-                              widget.currentPath.startsWith('/ordine/') ||
                               widget.currentPath.startsWith('/resoconto/'),
                           isExpanded: isExpanded,
                           onTap: () => context.go('/serate'),
                         ),
+                        
                         _NavItem(
-                          icon: Icons.restaurant_menu_rounded,
-                          label: 'Menù',
-                          isSelected: widget.currentPath.startsWith('/menu'),
+                          icon: Icons.food_bank_outlined,
+                          label: 'Alimenti, dolci e bevande',
+                          isSelected: widget.currentPath.startsWith('/alimenti'),
                           isExpanded: isExpanded,
-                          onTap: () => context.go('/menu/new'),
+                          onTap: () => context.go('/alimenti'),
                         ),
                       ],
                     ),
                   ),
 
-                  const Divider(color: Color(0xFF1E293B), height: 1),
+                  const Divider(color: _outlineVar, height: 1),
 
-                  // Settings nav item (bottom)
+                  // Bottom items
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _NavItem(
-                      icon: Icons.settings_rounded,
-                      label: 'Impostazioni',
-                      isSelected: widget.currentPath == '/settings',
-                      isExpanded: isExpanded,
-                      onTap: () => context.go('/settings'),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      children: [
+                        _NavItem(
+                          icon: Icons.settings_outlined,
+                          label: 'Impostazioni',
+                          isSelected: widget.currentPath == '/settings',
+                          isExpanded: isExpanded,
+                          onTap: () => context.go('/settings'),
+                        ),
+                      ],
                     ),
                   ),
 
-                  const Divider(color: Color(0xFF1E293B), height: 1),
+                  const Divider(color: _outlineVar, height: 1),
 
-                  // Toggle Button
+                  // Collapse toggle
                   InkWell(
                     onTap: () => setState(() => isExpanded = !isExpanded),
                     child: SizedBox(
-                      height: 52,
+                      height: 44,
                       child: Row(
                         mainAxisAlignment: isExpanded
                             ? MainAxisAlignment.end
                             : MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(
-                              right: isExpanded ? 16 : 0,
-                            ),
+                            padding: EdgeInsets.only(right: isExpanded ? 16 : 0),
                             child: Icon(
                               isExpanded
                                   ? Icons.chevron_left_rounded
                                   : Icons.chevron_right_rounded,
-                              color: const Color(0xFF64748B),
+                              color: _onSurfaceVar,
                               size: 20,
                             ),
                           ),
@@ -173,15 +185,15 @@ class _MainLayoutState extends State<MainLayout> {
             ),
           ),
 
-          // Main Content
-          Expanded(
-            child: widget.child,
-          ),
+          // ── Main content ────────────────────────────────────────────────────
+          Expanded(child: widget.child),
         ],
       ),
     );
   }
 }
+
+
 
 class _NavItem extends StatefulWidget {
   final IconData icon;
@@ -212,67 +224,47 @@ class _NavItemState extends State<_NavItem> {
       onExit: (_) => setState(() => isHovered = false),
       child: InkWell(
         onTap: widget.onTap,
-        child: SizedBox(
-          height: 44,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          height: 48,
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? _outlineVar.withValues(alpha: 0.4)
+                : isHovered
+                    ? _containerHigh
+                    : Colors.transparent,
+          ),
           child: Row(
             children: [
-              // Left indicator bar
+              // 4px active indicator bar
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                width: 3,
-                height: widget.isSelected ? 44 : 0,
-                decoration: const BoxDecoration(
-                  color: AppTheme.navbarSelected,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(3),
-                    bottomRight: Radius.circular(3),
-                  ),
+                width: 4,
+                height: widget.isSelected ? 48 : 0,
+                color: _primary,
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: widget.isSelected ? 16 : 20,
+                  right: 12,
+                ),
+                child: Icon(
+                  widget.icon,
+                  color:  _onSurfaceVar,
+                  size: 20,
                 ),
               ),
-              // Item content
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: widget.isSelected
-                        ? AppTheme.navbarSelected.withValues(alpha: 0.12)
-                        : isHovered
-                            ? const Color(0xFF1E293B)
-                            : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        widget.icon,
-                        color: widget.isSelected
-                            ? AppTheme.navbarSelected
-                            : const Color(0xFF94A3B8),
-                        size: 20,
-                      ),
-                      if (widget.isExpanded) ...[
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            widget.label,
-                            style: TextStyle(
-                              color: widget.isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF94A3B8),
-                              fontSize: 14,
-                              fontWeight: widget.isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              letterSpacing: -0.1,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+              if (widget.isExpanded)
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    style: GoogleFonts.inter(
+                      color: _onSurfaceVar,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500 ,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

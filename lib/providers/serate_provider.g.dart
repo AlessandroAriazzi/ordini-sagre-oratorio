@@ -74,7 +74,7 @@ final class SerateNotifierProvider
   SerateNotifier create() => SerateNotifier();
 }
 
-String _$serateNotifierHash() => r'bb4a8bb9030b290d3ba6ff614920e2e6cc509c4c';
+String _$serateNotifierHash() => r'b4f6ca96bc08ffc5ba82b8d3f6db8fe7a5cc1b1e';
 
 abstract class _$SerateNotifier extends $AsyncNotifier<List<models.Serata>> {
   FutureOr<List<models.Serata>> build();

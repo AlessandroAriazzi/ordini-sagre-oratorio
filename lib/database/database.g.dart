@@ -39,17 +39,8 @@ class $SerateTable extends Serate with TableInfo<$SerateTable, SerataData> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _menuIdMeta = const VerificationMeta('menuId');
   @override
-  late final GeneratedColumn<int> menuId = GeneratedColumn<int>(
-    'menu_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, titolo, data, menuId];
+  List<GeneratedColumn> get $columns => [id, titolo, data];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -81,12 +72,6 @@ class $SerateTable extends Serate with TableInfo<$SerateTable, SerataData> {
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
-    if (data.containsKey('menu_id')) {
-      context.handle(
-        _menuIdMeta,
-        menuId.isAcceptableOrUnknown(data['menu_id']!, _menuIdMeta),
-      );
-    }
     return context;
   }
 
@@ -108,10 +93,6 @@ class $SerateTable extends Serate with TableInfo<$SerateTable, SerataData> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}data'],
       )!,
-      menuId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}menu_id'],
-      ),
     );
   }
 
@@ -125,12 +106,10 @@ class SerataData extends DataClass implements Insertable<SerataData> {
   final int id;
   final String titolo;
   final DateTime data;
-  final int? menuId;
   const SerataData({
     required this.id,
     required this.titolo,
     required this.data,
-    this.menuId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -138,9 +117,6 @@ class SerataData extends DataClass implements Insertable<SerataData> {
     map['id'] = Variable<int>(id);
     map['titolo'] = Variable<String>(titolo);
     map['data'] = Variable<DateTime>(data);
-    if (!nullToAbsent || menuId != null) {
-      map['menu_id'] = Variable<int>(menuId);
-    }
     return map;
   }
 
@@ -149,9 +125,6 @@ class SerataData extends DataClass implements Insertable<SerataData> {
       id: Value(id),
       titolo: Value(titolo),
       data: Value(data),
-      menuId: menuId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(menuId),
     );
   }
 
@@ -164,7 +137,6 @@ class SerataData extends DataClass implements Insertable<SerataData> {
       id: serializer.fromJson<int>(json['id']),
       titolo: serializer.fromJson<String>(json['titolo']),
       data: serializer.fromJson<DateTime>(json['data']),
-      menuId: serializer.fromJson<int?>(json['menuId']),
     );
   }
   @override
@@ -174,27 +146,19 @@ class SerataData extends DataClass implements Insertable<SerataData> {
       'id': serializer.toJson<int>(id),
       'titolo': serializer.toJson<String>(titolo),
       'data': serializer.toJson<DateTime>(data),
-      'menuId': serializer.toJson<int?>(menuId),
     };
   }
 
-  SerataData copyWith({
-    int? id,
-    String? titolo,
-    DateTime? data,
-    Value<int?> menuId = const Value.absent(),
-  }) => SerataData(
+  SerataData copyWith({int? id, String? titolo, DateTime? data}) => SerataData(
     id: id ?? this.id,
     titolo: titolo ?? this.titolo,
     data: data ?? this.data,
-    menuId: menuId.present ? menuId.value : this.menuId,
   );
   SerataData copyWithCompanion(SerateCompanion data) {
     return SerataData(
       id: data.id.present ? data.id.value : this.id,
       titolo: data.titolo.present ? data.titolo.value : this.titolo,
       data: data.data.present ? data.data.value : this.data,
-      menuId: data.menuId.present ? data.menuId.value : this.menuId,
     );
   }
 
@@ -203,53 +167,46 @@ class SerataData extends DataClass implements Insertable<SerataData> {
     return (StringBuffer('SerataData(')
           ..write('id: $id, ')
           ..write('titolo: $titolo, ')
-          ..write('data: $data, ')
-          ..write('menuId: $menuId')
+          ..write('data: $data')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, titolo, data, menuId);
+  int get hashCode => Object.hash(id, titolo, data);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SerataData &&
           other.id == this.id &&
           other.titolo == this.titolo &&
-          other.data == this.data &&
-          other.menuId == this.menuId);
+          other.data == this.data);
 }
 
 class SerateCompanion extends UpdateCompanion<SerataData> {
   final Value<int> id;
   final Value<String> titolo;
   final Value<DateTime> data;
-  final Value<int?> menuId;
   const SerateCompanion({
     this.id = const Value.absent(),
     this.titolo = const Value.absent(),
     this.data = const Value.absent(),
-    this.menuId = const Value.absent(),
   });
   SerateCompanion.insert({
     this.id = const Value.absent(),
     required String titolo,
     required DateTime data,
-    this.menuId = const Value.absent(),
   }) : titolo = Value(titolo),
        data = Value(data);
   static Insertable<SerataData> custom({
     Expression<int>? id,
     Expression<String>? titolo,
     Expression<DateTime>? data,
-    Expression<int>? menuId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (titolo != null) 'titolo': titolo,
       if (data != null) 'data': data,
-      if (menuId != null) 'menu_id': menuId,
     });
   }
 
@@ -257,13 +214,11 @@ class SerateCompanion extends UpdateCompanion<SerataData> {
     Value<int>? id,
     Value<String>? titolo,
     Value<DateTime>? data,
-    Value<int?>? menuId,
   }) {
     return SerateCompanion(
       id: id ?? this.id,
       titolo: titolo ?? this.titolo,
       data: data ?? this.data,
-      menuId: menuId ?? this.menuId,
     );
   }
 
@@ -279,9 +234,6 @@ class SerateCompanion extends UpdateCompanion<SerataData> {
     if (data.present) {
       map['data'] = Variable<DateTime>(data.value);
     }
-    if (menuId.present) {
-      map['menu_id'] = Variable<int>(menuId.value);
-    }
     return map;
   }
 
@@ -290,18 +242,18 @@ class SerateCompanion extends UpdateCompanion<SerataData> {
     return (StringBuffer('SerateCompanion(')
           ..write('id: $id, ')
           ..write('titolo: $titolo, ')
-          ..write('data: $data, ')
-          ..write('menuId: $menuId')
+          ..write('data: $data')
           ..write(')'))
         .toString();
   }
 }
 
-class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
+class $AlimentiTable extends Alimenti
+    with TableInfo<$AlimentiTable, AlimentoData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MenusTable(this.attachedDatabase, [this._alias]);
+  $AlimentiTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -324,16 +276,38 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _categoriaMeta = const VerificationMeta(
+    'categoria',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, nome];
+  late final GeneratedColumn<String> categoria = GeneratedColumn<String>(
+    'categoria',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _prezzoDefaultMeta = const VerificationMeta(
+    'prezzoDefault',
+  );
+  @override
+  late final GeneratedColumn<double> prezzoDefault = GeneratedColumn<double>(
+    'prezzo_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, nome, categoria, prezzoDefault];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'menus';
+  static const String $name = 'alimenti';
   @override
   VerificationContext validateIntegrity(
-    Insertable<MenuData> instance, {
+    Insertable<AlimentoData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -349,15 +323,34 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
     } else if (isInserting) {
       context.missing(_nomeMeta);
     }
+    if (data.containsKey('categoria')) {
+      context.handle(
+        _categoriaMeta,
+        categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoriaMeta);
+    }
+    if (data.containsKey('prezzo_default')) {
+      context.handle(
+        _prezzoDefaultMeta,
+        prezzoDefault.isAcceptableOrUnknown(
+          data['prezzo_default']!,
+          _prezzoDefaultMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_prezzoDefaultMeta);
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  MenuData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  AlimentoData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MenuData(
+    return AlimentoData(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -366,39 +359,63 @@ class $MenusTable extends Menus with TableInfo<$MenusTable, MenuData> {
         DriftSqlType.string,
         data['${effectivePrefix}nome'],
       )!,
+      categoria: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}categoria'],
+      )!,
+      prezzoDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}prezzo_default'],
+      )!,
     );
   }
 
   @override
-  $MenusTable createAlias(String alias) {
-    return $MenusTable(attachedDatabase, alias);
+  $AlimentiTable createAlias(String alias) {
+    return $AlimentiTable(attachedDatabase, alias);
   }
 }
 
-class MenuData extends DataClass implements Insertable<MenuData> {
+class AlimentoData extends DataClass implements Insertable<AlimentoData> {
   final int id;
   final String nome;
-  const MenuData({required this.id, required this.nome});
+  final String categoria;
+  final double prezzoDefault;
+  const AlimentoData({
+    required this.id,
+    required this.nome,
+    required this.categoria,
+    required this.prezzoDefault,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nome'] = Variable<String>(nome);
+    map['categoria'] = Variable<String>(categoria);
+    map['prezzo_default'] = Variable<double>(prezzoDefault);
     return map;
   }
 
-  MenusCompanion toCompanion(bool nullToAbsent) {
-    return MenusCompanion(id: Value(id), nome: Value(nome));
+  AlimentiCompanion toCompanion(bool nullToAbsent) {
+    return AlimentiCompanion(
+      id: Value(id),
+      nome: Value(nome),
+      categoria: Value(categoria),
+      prezzoDefault: Value(prezzoDefault),
+    );
   }
 
-  factory MenuData.fromJson(
+  factory AlimentoData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MenuData(
+    return AlimentoData(
       id: serializer.fromJson<int>(json['id']),
       nome: serializer.fromJson<String>(json['nome']),
+      categoria: serializer.fromJson<String>(json['categoria']),
+      prezzoDefault: serializer.fromJson<double>(json['prezzoDefault']),
     );
   }
   @override
@@ -407,56 +424,101 @@ class MenuData extends DataClass implements Insertable<MenuData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'nome': serializer.toJson<String>(nome),
+      'categoria': serializer.toJson<String>(categoria),
+      'prezzoDefault': serializer.toJson<double>(prezzoDefault),
     };
   }
 
-  MenuData copyWith({int? id, String? nome}) =>
-      MenuData(id: id ?? this.id, nome: nome ?? this.nome);
-  MenuData copyWithCompanion(MenusCompanion data) {
-    return MenuData(
+  AlimentoData copyWith({
+    int? id,
+    String? nome,
+    String? categoria,
+    double? prezzoDefault,
+  }) => AlimentoData(
+    id: id ?? this.id,
+    nome: nome ?? this.nome,
+    categoria: categoria ?? this.categoria,
+    prezzoDefault: prezzoDefault ?? this.prezzoDefault,
+  );
+  AlimentoData copyWithCompanion(AlimentiCompanion data) {
+    return AlimentoData(
       id: data.id.present ? data.id.value : this.id,
       nome: data.nome.present ? data.nome.value : this.nome,
+      categoria: data.categoria.present ? data.categoria.value : this.categoria,
+      prezzoDefault: data.prezzoDefault.present
+          ? data.prezzoDefault.value
+          : this.prezzoDefault,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('MenuData(')
+    return (StringBuffer('AlimentoData(')
           ..write('id: $id, ')
-          ..write('nome: $nome')
+          ..write('nome: $nome, ')
+          ..write('categoria: $categoria, ')
+          ..write('prezzoDefault: $prezzoDefault')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nome);
+  int get hashCode => Object.hash(id, nome, categoria, prezzoDefault);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MenuData && other.id == this.id && other.nome == this.nome);
+      (other is AlimentoData &&
+          other.id == this.id &&
+          other.nome == this.nome &&
+          other.categoria == this.categoria &&
+          other.prezzoDefault == this.prezzoDefault);
 }
 
-class MenusCompanion extends UpdateCompanion<MenuData> {
+class AlimentiCompanion extends UpdateCompanion<AlimentoData> {
   final Value<int> id;
   final Value<String> nome;
-  const MenusCompanion({
+  final Value<String> categoria;
+  final Value<double> prezzoDefault;
+  const AlimentiCompanion({
     this.id = const Value.absent(),
     this.nome = const Value.absent(),
+    this.categoria = const Value.absent(),
+    this.prezzoDefault = const Value.absent(),
   });
-  MenusCompanion.insert({this.id = const Value.absent(), required String nome})
-    : nome = Value(nome);
-  static Insertable<MenuData> custom({
+  AlimentiCompanion.insert({
+    this.id = const Value.absent(),
+    required String nome,
+    required String categoria,
+    required double prezzoDefault,
+  }) : nome = Value(nome),
+       categoria = Value(categoria),
+       prezzoDefault = Value(prezzoDefault);
+  static Insertable<AlimentoData> custom({
     Expression<int>? id,
     Expression<String>? nome,
+    Expression<String>? categoria,
+    Expression<double>? prezzoDefault,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nome != null) 'nome': nome,
+      if (categoria != null) 'categoria': categoria,
+      if (prezzoDefault != null) 'prezzo_default': prezzoDefault,
     });
   }
 
-  MenusCompanion copyWith({Value<int>? id, Value<String>? nome}) {
-    return MenusCompanion(id: id ?? this.id, nome: nome ?? this.nome);
+  AlimentiCompanion copyWith({
+    Value<int>? id,
+    Value<String>? nome,
+    Value<String>? categoria,
+    Value<double>? prezzoDefault,
+  }) {
+    return AlimentiCompanion(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      categoria: categoria ?? this.categoria,
+      prezzoDefault: prezzoDefault ?? this.prezzoDefault,
+    );
   }
 
   @override
@@ -468,25 +530,33 @@ class MenusCompanion extends UpdateCompanion<MenuData> {
     if (nome.present) {
       map['nome'] = Variable<String>(nome.value);
     }
+    if (categoria.present) {
+      map['categoria'] = Variable<String>(categoria.value);
+    }
+    if (prezzoDefault.present) {
+      map['prezzo_default'] = Variable<double>(prezzoDefault.value);
+    }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('MenusCompanion(')
+    return (StringBuffer('AlimentiCompanion(')
           ..write('id: $id, ')
-          ..write('nome: $nome')
+          ..write('nome: $nome, ')
+          ..write('categoria: $categoria, ')
+          ..write('prezzoDefault: $prezzoDefault')
           ..write(')'))
         .toString();
   }
 }
 
-class $ProdottiTable extends Prodotti
-    with TableInfo<$ProdottiTable, ProdottoData> {
+class $SerataAlimentiTable extends SerataAlimenti
+    with TableInfo<$SerataAlimentiTable, SerataAlimentoData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ProdottiTable(this.attachedDatabase, [this._alias]);
+  $SerataAlimentiTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -500,13 +570,26 @@ class $ProdottiTable extends Prodotti
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  static const VerificationMeta _serataIdMeta = const VerificationMeta(
+    'serataId',
+  );
   @override
-  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
-    'nome',
+  late final GeneratedColumn<int> serataId = GeneratedColumn<int>(
+    'serata_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _alimentoIdMeta = const VerificationMeta(
+    'alimentoId',
+  );
+  @override
+  late final GeneratedColumn<int> alimentoId = GeneratedColumn<int>(
+    'alimento_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _prezzoMeta = const VerificationMeta('prezzo');
@@ -516,26 +599,6 @@ class $ProdottiTable extends Prodotti
     aliasedName,
     false,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _menuIdMeta = const VerificationMeta('menuId');
-  @override
-  late final GeneratedColumn<int> menuId = GeneratedColumn<int>(
-    'menu_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _categoriaMeta = const VerificationMeta(
-    'categoria',
-  );
-  @override
-  late final GeneratedColumn<String> categoria = GeneratedColumn<String>(
-    'categoria',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _quantitaMeta = const VerificationMeta(
@@ -553,20 +616,19 @@ class $ProdottiTable extends Prodotti
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    nome,
+    serataId,
+    alimentoId,
     prezzo,
-    menuId,
-    categoria,
     quantita,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'prodotti';
+  static const String $name = 'serata_alimenti';
   @override
   VerificationContext validateIntegrity(
-    Insertable<ProdottoData> instance, {
+    Insertable<SerataAlimentoData> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -574,13 +636,21 @@ class $ProdottiTable extends Prodotti
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('nome')) {
+    if (data.containsKey('serata_id')) {
       context.handle(
-        _nomeMeta,
-        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+        _serataIdMeta,
+        serataId.isAcceptableOrUnknown(data['serata_id']!, _serataIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_nomeMeta);
+      context.missing(_serataIdMeta);
+    }
+    if (data.containsKey('alimento_id')) {
+      context.handle(
+        _alimentoIdMeta,
+        alimentoId.isAcceptableOrUnknown(data['alimento_id']!, _alimentoIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_alimentoIdMeta);
     }
     if (data.containsKey('prezzo')) {
       context.handle(
@@ -589,22 +659,6 @@ class $ProdottiTable extends Prodotti
       );
     } else if (isInserting) {
       context.missing(_prezzoMeta);
-    }
-    if (data.containsKey('menu_id')) {
-      context.handle(
-        _menuIdMeta,
-        menuId.isAcceptableOrUnknown(data['menu_id']!, _menuIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_menuIdMeta);
-    }
-    if (data.containsKey('categoria')) {
-      context.handle(
-        _categoriaMeta,
-        categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_categoriaMeta);
     }
     if (data.containsKey('quantita')) {
       context.handle(
@@ -618,28 +672,24 @@ class $ProdottiTable extends Prodotti
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ProdottoData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SerataAlimentoData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ProdottoData(
+    return SerataAlimentoData(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      nome: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}nome'],
+      serataId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}serata_id'],
+      )!,
+      alimentoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}alimento_id'],
       )!,
       prezzo: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}prezzo'],
-      )!,
-      menuId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}menu_id'],
-      )!,
-      categoria: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}categoria'],
       )!,
       quantita: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -649,60 +699,56 @@ class $ProdottiTable extends Prodotti
   }
 
   @override
-  $ProdottiTable createAlias(String alias) {
-    return $ProdottiTable(attachedDatabase, alias);
+  $SerataAlimentiTable createAlias(String alias) {
+    return $SerataAlimentiTable(attachedDatabase, alias);
   }
 }
 
-class ProdottoData extends DataClass implements Insertable<ProdottoData> {
+class SerataAlimentoData extends DataClass
+    implements Insertable<SerataAlimentoData> {
   final int id;
-  final String nome;
+  final int serataId;
+  final int alimentoId;
   final double prezzo;
-  final int menuId;
-  final String categoria;
   final int quantita;
-  const ProdottoData({
+  const SerataAlimentoData({
     required this.id,
-    required this.nome,
+    required this.serataId,
+    required this.alimentoId,
     required this.prezzo,
-    required this.menuId,
-    required this.categoria,
     required this.quantita,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['nome'] = Variable<String>(nome);
+    map['serata_id'] = Variable<int>(serataId);
+    map['alimento_id'] = Variable<int>(alimentoId);
     map['prezzo'] = Variable<double>(prezzo);
-    map['menu_id'] = Variable<int>(menuId);
-    map['categoria'] = Variable<String>(categoria);
     map['quantita'] = Variable<int>(quantita);
     return map;
   }
 
-  ProdottiCompanion toCompanion(bool nullToAbsent) {
-    return ProdottiCompanion(
+  SerataAlimentiCompanion toCompanion(bool nullToAbsent) {
+    return SerataAlimentiCompanion(
       id: Value(id),
-      nome: Value(nome),
+      serataId: Value(serataId),
+      alimentoId: Value(alimentoId),
       prezzo: Value(prezzo),
-      menuId: Value(menuId),
-      categoria: Value(categoria),
       quantita: Value(quantita),
     );
   }
 
-  factory ProdottoData.fromJson(
+  factory SerataAlimentoData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ProdottoData(
+    return SerataAlimentoData(
       id: serializer.fromJson<int>(json['id']),
-      nome: serializer.fromJson<String>(json['nome']),
+      serataId: serializer.fromJson<int>(json['serataId']),
+      alimentoId: serializer.fromJson<int>(json['alimentoId']),
       prezzo: serializer.fromJson<double>(json['prezzo']),
-      menuId: serializer.fromJson<int>(json['menuId']),
-      categoria: serializer.fromJson<String>(json['categoria']),
       quantita: serializer.fromJson<int>(json['quantita']),
     );
   }
@@ -711,126 +757,113 @@ class ProdottoData extends DataClass implements Insertable<ProdottoData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'nome': serializer.toJson<String>(nome),
+      'serataId': serializer.toJson<int>(serataId),
+      'alimentoId': serializer.toJson<int>(alimentoId),
       'prezzo': serializer.toJson<double>(prezzo),
-      'menuId': serializer.toJson<int>(menuId),
-      'categoria': serializer.toJson<String>(categoria),
       'quantita': serializer.toJson<int>(quantita),
     };
   }
 
-  ProdottoData copyWith({
+  SerataAlimentoData copyWith({
     int? id,
-    String? nome,
+    int? serataId,
+    int? alimentoId,
     double? prezzo,
-    int? menuId,
-    String? categoria,
     int? quantita,
-  }) => ProdottoData(
+  }) => SerataAlimentoData(
     id: id ?? this.id,
-    nome: nome ?? this.nome,
+    serataId: serataId ?? this.serataId,
+    alimentoId: alimentoId ?? this.alimentoId,
     prezzo: prezzo ?? this.prezzo,
-    menuId: menuId ?? this.menuId,
-    categoria: categoria ?? this.categoria,
     quantita: quantita ?? this.quantita,
   );
-  ProdottoData copyWithCompanion(ProdottiCompanion data) {
-    return ProdottoData(
+  SerataAlimentoData copyWithCompanion(SerataAlimentiCompanion data) {
+    return SerataAlimentoData(
       id: data.id.present ? data.id.value : this.id,
-      nome: data.nome.present ? data.nome.value : this.nome,
+      serataId: data.serataId.present ? data.serataId.value : this.serataId,
+      alimentoId: data.alimentoId.present
+          ? data.alimentoId.value
+          : this.alimentoId,
       prezzo: data.prezzo.present ? data.prezzo.value : this.prezzo,
-      menuId: data.menuId.present ? data.menuId.value : this.menuId,
-      categoria: data.categoria.present ? data.categoria.value : this.categoria,
       quantita: data.quantita.present ? data.quantita.value : this.quantita,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('ProdottoData(')
+    return (StringBuffer('SerataAlimentoData(')
           ..write('id: $id, ')
-          ..write('nome: $nome, ')
+          ..write('serataId: $serataId, ')
+          ..write('alimentoId: $alimentoId, ')
           ..write('prezzo: $prezzo, ')
-          ..write('menuId: $menuId, ')
-          ..write('categoria: $categoria, ')
           ..write('quantita: $quantita')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nome, prezzo, menuId, categoria, quantita);
+  int get hashCode => Object.hash(id, serataId, alimentoId, prezzo, quantita);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ProdottoData &&
+      (other is SerataAlimentoData &&
           other.id == this.id &&
-          other.nome == this.nome &&
+          other.serataId == this.serataId &&
+          other.alimentoId == this.alimentoId &&
           other.prezzo == this.prezzo &&
-          other.menuId == this.menuId &&
-          other.categoria == this.categoria &&
           other.quantita == this.quantita);
 }
 
-class ProdottiCompanion extends UpdateCompanion<ProdottoData> {
+class SerataAlimentiCompanion extends UpdateCompanion<SerataAlimentoData> {
   final Value<int> id;
-  final Value<String> nome;
+  final Value<int> serataId;
+  final Value<int> alimentoId;
   final Value<double> prezzo;
-  final Value<int> menuId;
-  final Value<String> categoria;
   final Value<int> quantita;
-  const ProdottiCompanion({
+  const SerataAlimentiCompanion({
     this.id = const Value.absent(),
-    this.nome = const Value.absent(),
+    this.serataId = const Value.absent(),
+    this.alimentoId = const Value.absent(),
     this.prezzo = const Value.absent(),
-    this.menuId = const Value.absent(),
-    this.categoria = const Value.absent(),
     this.quantita = const Value.absent(),
   });
-  ProdottiCompanion.insert({
+  SerataAlimentiCompanion.insert({
     this.id = const Value.absent(),
-    required String nome,
+    required int serataId,
+    required int alimentoId,
     required double prezzo,
-    required int menuId,
-    required String categoria,
     this.quantita = const Value.absent(),
-  }) : nome = Value(nome),
-       prezzo = Value(prezzo),
-       menuId = Value(menuId),
-       categoria = Value(categoria);
-  static Insertable<ProdottoData> custom({
+  }) : serataId = Value(serataId),
+       alimentoId = Value(alimentoId),
+       prezzo = Value(prezzo);
+  static Insertable<SerataAlimentoData> custom({
     Expression<int>? id,
-    Expression<String>? nome,
+    Expression<int>? serataId,
+    Expression<int>? alimentoId,
     Expression<double>? prezzo,
-    Expression<int>? menuId,
-    Expression<String>? categoria,
     Expression<int>? quantita,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (nome != null) 'nome': nome,
+      if (serataId != null) 'serata_id': serataId,
+      if (alimentoId != null) 'alimento_id': alimentoId,
       if (prezzo != null) 'prezzo': prezzo,
-      if (menuId != null) 'menu_id': menuId,
-      if (categoria != null) 'categoria': categoria,
       if (quantita != null) 'quantita': quantita,
     });
   }
 
-  ProdottiCompanion copyWith({
+  SerataAlimentiCompanion copyWith({
     Value<int>? id,
-    Value<String>? nome,
+    Value<int>? serataId,
+    Value<int>? alimentoId,
     Value<double>? prezzo,
-    Value<int>? menuId,
-    Value<String>? categoria,
     Value<int>? quantita,
   }) {
-    return ProdottiCompanion(
+    return SerataAlimentiCompanion(
       id: id ?? this.id,
-      nome: nome ?? this.nome,
+      serataId: serataId ?? this.serataId,
+      alimentoId: alimentoId ?? this.alimentoId,
       prezzo: prezzo ?? this.prezzo,
-      menuId: menuId ?? this.menuId,
-      categoria: categoria ?? this.categoria,
       quantita: quantita ?? this.quantita,
     );
   }
@@ -841,17 +874,14 @@ class ProdottiCompanion extends UpdateCompanion<ProdottoData> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (nome.present) {
-      map['nome'] = Variable<String>(nome.value);
+    if (serataId.present) {
+      map['serata_id'] = Variable<int>(serataId.value);
+    }
+    if (alimentoId.present) {
+      map['alimento_id'] = Variable<int>(alimentoId.value);
     }
     if (prezzo.present) {
       map['prezzo'] = Variable<double>(prezzo.value);
-    }
-    if (menuId.present) {
-      map['menu_id'] = Variable<int>(menuId.value);
-    }
-    if (categoria.present) {
-      map['categoria'] = Variable<String>(categoria.value);
     }
     if (quantita.present) {
       map['quantita'] = Variable<int>(quantita.value);
@@ -861,12 +891,11 @@ class ProdottiCompanion extends UpdateCompanion<ProdottoData> {
 
   @override
   String toString() {
-    return (StringBuffer('ProdottiCompanion(')
+    return (StringBuffer('SerataAlimentiCompanion(')
           ..write('id: $id, ')
-          ..write('nome: $nome, ')
+          ..write('serataId: $serataId, ')
+          ..write('alimentoId: $alimentoId, ')
           ..write('prezzo: $prezzo, ')
-          ..write('menuId: $menuId, ')
-          ..write('categoria: $categoria, ')
           ..write('quantita: $quantita')
           ..write(')'))
         .toString();
@@ -902,6 +931,16 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _numeroMeta = const VerificationMeta('numero');
+  @override
+  late final GeneratedColumn<int> numero = GeneratedColumn<int>(
+    'numero',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _dataOraMeta = const VerificationMeta(
     'dataOra',
   );
@@ -923,7 +962,7 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, serataId, dataOra, totale];
+  List<GeneratedColumn> get $columns => [id, serataId, numero, dataOra, totale];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -946,6 +985,12 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
       );
     } else if (isInserting) {
       context.missing(_serataIdMeta);
+    }
+    if (data.containsKey('numero')) {
+      context.handle(
+        _numeroMeta,
+        numero.isAcceptableOrUnknown(data['numero']!, _numeroMeta),
+      );
     }
     if (data.containsKey('data_ora')) {
       context.handle(
@@ -980,6 +1025,10 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
         DriftSqlType.int,
         data['${effectivePrefix}serata_id'],
       )!,
+      numero: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero'],
+      )!,
       dataOra: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}data_ora'],
@@ -1000,11 +1049,13 @@ class $OrdiniTable extends Ordini with TableInfo<$OrdiniTable, OrdineData> {
 class OrdineData extends DataClass implements Insertable<OrdineData> {
   final int id;
   final int serataId;
+  final int numero;
   final DateTime dataOra;
   final double totale;
   const OrdineData({
     required this.id,
     required this.serataId,
+    required this.numero,
     required this.dataOra,
     required this.totale,
   });
@@ -1013,6 +1064,7 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['serata_id'] = Variable<int>(serataId);
+    map['numero'] = Variable<int>(numero);
     map['data_ora'] = Variable<DateTime>(dataOra);
     map['totale'] = Variable<double>(totale);
     return map;
@@ -1022,6 +1074,7 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     return OrdiniCompanion(
       id: Value(id),
       serataId: Value(serataId),
+      numero: Value(numero),
       dataOra: Value(dataOra),
       totale: Value(totale),
     );
@@ -1035,6 +1088,7 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     return OrdineData(
       id: serializer.fromJson<int>(json['id']),
       serataId: serializer.fromJson<int>(json['serataId']),
+      numero: serializer.fromJson<int>(json['numero']),
       dataOra: serializer.fromJson<DateTime>(json['dataOra']),
       totale: serializer.fromJson<double>(json['totale']),
     );
@@ -1045,6 +1099,7 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'serataId': serializer.toJson<int>(serataId),
+      'numero': serializer.toJson<int>(numero),
       'dataOra': serializer.toJson<DateTime>(dataOra),
       'totale': serializer.toJson<double>(totale),
     };
@@ -1053,11 +1108,13 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
   OrdineData copyWith({
     int? id,
     int? serataId,
+    int? numero,
     DateTime? dataOra,
     double? totale,
   }) => OrdineData(
     id: id ?? this.id,
     serataId: serataId ?? this.serataId,
+    numero: numero ?? this.numero,
     dataOra: dataOra ?? this.dataOra,
     totale: totale ?? this.totale,
   );
@@ -1065,6 +1122,7 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     return OrdineData(
       id: data.id.present ? data.id.value : this.id,
       serataId: data.serataId.present ? data.serataId.value : this.serataId,
+      numero: data.numero.present ? data.numero.value : this.numero,
       dataOra: data.dataOra.present ? data.dataOra.value : this.dataOra,
       totale: data.totale.present ? data.totale.value : this.totale,
     );
@@ -1075,6 +1133,7 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
     return (StringBuffer('OrdineData(')
           ..write('id: $id, ')
           ..write('serataId: $serataId, ')
+          ..write('numero: $numero, ')
           ..write('dataOra: $dataOra, ')
           ..write('totale: $totale')
           ..write(')'))
@@ -1082,13 +1141,14 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, serataId, dataOra, totale);
+  int get hashCode => Object.hash(id, serataId, numero, dataOra, totale);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is OrdineData &&
           other.id == this.id &&
           other.serataId == this.serataId &&
+          other.numero == this.numero &&
           other.dataOra == this.dataOra &&
           other.totale == this.totale);
 }
@@ -1096,17 +1156,20 @@ class OrdineData extends DataClass implements Insertable<OrdineData> {
 class OrdiniCompanion extends UpdateCompanion<OrdineData> {
   final Value<int> id;
   final Value<int> serataId;
+  final Value<int> numero;
   final Value<DateTime> dataOra;
   final Value<double> totale;
   const OrdiniCompanion({
     this.id = const Value.absent(),
     this.serataId = const Value.absent(),
+    this.numero = const Value.absent(),
     this.dataOra = const Value.absent(),
     this.totale = const Value.absent(),
   });
   OrdiniCompanion.insert({
     this.id = const Value.absent(),
     required int serataId,
+    this.numero = const Value.absent(),
     required DateTime dataOra,
     required double totale,
   }) : serataId = Value(serataId),
@@ -1115,12 +1178,14 @@ class OrdiniCompanion extends UpdateCompanion<OrdineData> {
   static Insertable<OrdineData> custom({
     Expression<int>? id,
     Expression<int>? serataId,
+    Expression<int>? numero,
     Expression<DateTime>? dataOra,
     Expression<double>? totale,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (serataId != null) 'serata_id': serataId,
+      if (numero != null) 'numero': numero,
       if (dataOra != null) 'data_ora': dataOra,
       if (totale != null) 'totale': totale,
     });
@@ -1129,12 +1194,14 @@ class OrdiniCompanion extends UpdateCompanion<OrdineData> {
   OrdiniCompanion copyWith({
     Value<int>? id,
     Value<int>? serataId,
+    Value<int>? numero,
     Value<DateTime>? dataOra,
     Value<double>? totale,
   }) {
     return OrdiniCompanion(
       id: id ?? this.id,
       serataId: serataId ?? this.serataId,
+      numero: numero ?? this.numero,
       dataOra: dataOra ?? this.dataOra,
       totale: totale ?? this.totale,
     );
@@ -1148,6 +1215,9 @@ class OrdiniCompanion extends UpdateCompanion<OrdineData> {
     }
     if (serataId.present) {
       map['serata_id'] = Variable<int>(serataId.value);
+    }
+    if (numero.present) {
+      map['numero'] = Variable<int>(numero.value);
     }
     if (dataOra.present) {
       map['data_ora'] = Variable<DateTime>(dataOra.value);
@@ -1163,6 +1233,7 @@ class OrdiniCompanion extends UpdateCompanion<OrdineData> {
     return (StringBuffer('OrdiniCompanion(')
           ..write('id: $id, ')
           ..write('serataId: $serataId, ')
+          ..write('numero: $numero, ')
           ..write('dataOra: $dataOra, ')
           ..write('totale: $totale')
           ..write(')'))
@@ -1592,8 +1663,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SerateTable serate = $SerateTable(this);
-  late final $MenusTable menus = $MenusTable(this);
-  late final $ProdottiTable prodotti = $ProdottiTable(this);
+  late final $AlimentiTable alimenti = $AlimentiTable(this);
+  late final $SerataAlimentiTable serataAlimenti = $SerataAlimentiTable(this);
   late final $OrdiniTable ordini = $OrdiniTable(this);
   late final $OrdiniItemsTable ordiniItems = $OrdiniItemsTable(this);
   @override
@@ -1602,8 +1673,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     serate,
-    menus,
-    prodotti,
+    alimenti,
+    serataAlimenti,
     ordini,
     ordiniItems,
   ];
@@ -1614,14 +1685,12 @@ typedef $$SerateTableCreateCompanionBuilder =
       Value<int> id,
       required String titolo,
       required DateTime data,
-      Value<int?> menuId,
     });
 typedef $$SerateTableUpdateCompanionBuilder =
     SerateCompanion Function({
       Value<int> id,
       Value<String> titolo,
       Value<DateTime> data,
-      Value<int?> menuId,
     });
 
 class $$SerateTableFilterComposer
@@ -1645,11 +1714,6 @@ class $$SerateTableFilterComposer
 
   ColumnFilters<DateTime> get data => $composableBuilder(
     column: $table.data,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get menuId => $composableBuilder(
-    column: $table.menuId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1677,11 +1741,6 @@ class $$SerateTableOrderingComposer
     column: $table.data,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<int> get menuId => $composableBuilder(
-    column: $table.menuId,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
 class $$SerateTableAnnotationComposer
@@ -1701,9 +1760,6 @@ class $$SerateTableAnnotationComposer
 
   GeneratedColumn<DateTime> get data =>
       $composableBuilder(column: $table.data, builder: (column) => column);
-
-  GeneratedColumn<int> get menuId =>
-      $composableBuilder(column: $table.menuId, builder: (column) => column);
 }
 
 class $$SerateTableTableManager
@@ -1737,25 +1793,13 @@ class $$SerateTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> titolo = const Value.absent(),
                 Value<DateTime> data = const Value.absent(),
-                Value<int?> menuId = const Value.absent(),
-              }) => SerateCompanion(
-                id: id,
-                titolo: titolo,
-                data: data,
-                menuId: menuId,
-              ),
+              }) => SerateCompanion(id: id, titolo: titolo, data: data),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String titolo,
                 required DateTime data,
-                Value<int?> menuId = const Value.absent(),
-              }) => SerateCompanion.insert(
-                id: id,
-                titolo: titolo,
-                data: data,
-                menuId: menuId,
-              ),
+              }) => SerateCompanion.insert(id: id, titolo: titolo, data: data),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
@@ -1778,13 +1822,24 @@ typedef $$SerateTableProcessedTableManager =
       SerataData,
       PrefetchHooks Function()
     >;
-typedef $$MenusTableCreateCompanionBuilder =
-    MenusCompanion Function({Value<int> id, required String nome});
-typedef $$MenusTableUpdateCompanionBuilder =
-    MenusCompanion Function({Value<int> id, Value<String> nome});
+typedef $$AlimentiTableCreateCompanionBuilder =
+    AlimentiCompanion Function({
+      Value<int> id,
+      required String nome,
+      required String categoria,
+      required double prezzoDefault,
+    });
+typedef $$AlimentiTableUpdateCompanionBuilder =
+    AlimentiCompanion Function({
+      Value<int> id,
+      Value<String> nome,
+      Value<String> categoria,
+      Value<double> prezzoDefault,
+    });
 
-class $$MenusTableFilterComposer extends Composer<_$AppDatabase, $MenusTable> {
-  $$MenusTableFilterComposer({
+class $$AlimentiTableFilterComposer
+    extends Composer<_$AppDatabase, $AlimentiTable> {
+  $$AlimentiTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1800,11 +1855,21 @@ class $$MenusTableFilterComposer extends Composer<_$AppDatabase, $MenusTable> {
     column: $table.nome,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get prezzoDefault => $composableBuilder(
+    column: $table.prezzoDefault,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
-class $$MenusTableOrderingComposer
-    extends Composer<_$AppDatabase, $MenusTable> {
-  $$MenusTableOrderingComposer({
+class $$AlimentiTableOrderingComposer
+    extends Composer<_$AppDatabase, $AlimentiTable> {
+  $$AlimentiTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1820,11 +1885,21 @@ class $$MenusTableOrderingComposer
     column: $table.nome,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get prezzoDefault => $composableBuilder(
+    column: $table.prezzoDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
-class $$MenusTableAnnotationComposer
-    extends Composer<_$AppDatabase, $MenusTable> {
-  $$MenusTableAnnotationComposer({
+class $$AlimentiTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AlimentiTable> {
+  $$AlimentiTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1836,42 +1911,69 @@ class $$MenusTableAnnotationComposer
 
   GeneratedColumn<String> get nome =>
       $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<String> get categoria =>
+      $composableBuilder(column: $table.categoria, builder: (column) => column);
+
+  GeneratedColumn<double> get prezzoDefault => $composableBuilder(
+    column: $table.prezzoDefault,
+    builder: (column) => column,
+  );
 }
 
-class $$MenusTableTableManager
+class $$AlimentiTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $MenusTable,
-          MenuData,
-          $$MenusTableFilterComposer,
-          $$MenusTableOrderingComposer,
-          $$MenusTableAnnotationComposer,
-          $$MenusTableCreateCompanionBuilder,
-          $$MenusTableUpdateCompanionBuilder,
-          (MenuData, BaseReferences<_$AppDatabase, $MenusTable, MenuData>),
-          MenuData,
+          $AlimentiTable,
+          AlimentoData,
+          $$AlimentiTableFilterComposer,
+          $$AlimentiTableOrderingComposer,
+          $$AlimentiTableAnnotationComposer,
+          $$AlimentiTableCreateCompanionBuilder,
+          $$AlimentiTableUpdateCompanionBuilder,
+          (
+            AlimentoData,
+            BaseReferences<_$AppDatabase, $AlimentiTable, AlimentoData>,
+          ),
+          AlimentoData,
           PrefetchHooks Function()
         > {
-  $$MenusTableTableManager(_$AppDatabase db, $MenusTable table)
+  $$AlimentiTableTableManager(_$AppDatabase db, $AlimentiTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$MenusTableFilterComposer($db: db, $table: table),
+              $$AlimentiTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$MenusTableOrderingComposer($db: db, $table: table),
+              $$AlimentiTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$MenusTableAnnotationComposer($db: db, $table: table),
+              $$AlimentiTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> nome = const Value.absent(),
-              }) => MenusCompanion(id: id, nome: nome),
+                Value<String> categoria = const Value.absent(),
+                Value<double> prezzoDefault = const Value.absent(),
+              }) => AlimentiCompanion(
+                id: id,
+                nome: nome,
+                categoria: categoria,
+                prezzoDefault: prezzoDefault,
+              ),
           createCompanionCallback:
-              ({Value<int> id = const Value.absent(), required String nome}) =>
-                  MenusCompanion.insert(id: id, nome: nome),
+              ({
+                Value<int> id = const Value.absent(),
+                required String nome,
+                required String categoria,
+                required double prezzoDefault,
+              }) => AlimentiCompanion.insert(
+                id: id,
+                nome: nome,
+                categoria: categoria,
+                prezzoDefault: prezzoDefault,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
@@ -1880,42 +1982,43 @@ class $$MenusTableTableManager
       );
 }
 
-typedef $$MenusTableProcessedTableManager =
+typedef $$AlimentiTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $MenusTable,
-      MenuData,
-      $$MenusTableFilterComposer,
-      $$MenusTableOrderingComposer,
-      $$MenusTableAnnotationComposer,
-      $$MenusTableCreateCompanionBuilder,
-      $$MenusTableUpdateCompanionBuilder,
-      (MenuData, BaseReferences<_$AppDatabase, $MenusTable, MenuData>),
-      MenuData,
+      $AlimentiTable,
+      AlimentoData,
+      $$AlimentiTableFilterComposer,
+      $$AlimentiTableOrderingComposer,
+      $$AlimentiTableAnnotationComposer,
+      $$AlimentiTableCreateCompanionBuilder,
+      $$AlimentiTableUpdateCompanionBuilder,
+      (
+        AlimentoData,
+        BaseReferences<_$AppDatabase, $AlimentiTable, AlimentoData>,
+      ),
+      AlimentoData,
       PrefetchHooks Function()
     >;
-typedef $$ProdottiTableCreateCompanionBuilder =
-    ProdottiCompanion Function({
+typedef $$SerataAlimentiTableCreateCompanionBuilder =
+    SerataAlimentiCompanion Function({
       Value<int> id,
-      required String nome,
+      required int serataId,
+      required int alimentoId,
       required double prezzo,
-      required int menuId,
-      required String categoria,
       Value<int> quantita,
     });
-typedef $$ProdottiTableUpdateCompanionBuilder =
-    ProdottiCompanion Function({
+typedef $$SerataAlimentiTableUpdateCompanionBuilder =
+    SerataAlimentiCompanion Function({
       Value<int> id,
-      Value<String> nome,
+      Value<int> serataId,
+      Value<int> alimentoId,
       Value<double> prezzo,
-      Value<int> menuId,
-      Value<String> categoria,
       Value<int> quantita,
     });
 
-class $$ProdottiTableFilterComposer
-    extends Composer<_$AppDatabase, $ProdottiTable> {
-  $$ProdottiTableFilterComposer({
+class $$SerataAlimentiTableFilterComposer
+    extends Composer<_$AppDatabase, $SerataAlimentiTable> {
+  $$SerataAlimentiTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1927,23 +2030,18 @@ class $$ProdottiTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get nome => $composableBuilder(
-    column: $table.nome,
+  ColumnFilters<int> get serataId => $composableBuilder(
+    column: $table.serataId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get alimentoId => $composableBuilder(
+    column: $table.alimentoId,
     builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<double> get prezzo => $composableBuilder(
     column: $table.prezzo,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get menuId => $composableBuilder(
-    column: $table.menuId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get categoria => $composableBuilder(
-    column: $table.categoria,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1953,9 +2051,9 @@ class $$ProdottiTableFilterComposer
   );
 }
 
-class $$ProdottiTableOrderingComposer
-    extends Composer<_$AppDatabase, $ProdottiTable> {
-  $$ProdottiTableOrderingComposer({
+class $$SerataAlimentiTableOrderingComposer
+    extends Composer<_$AppDatabase, $SerataAlimentiTable> {
+  $$SerataAlimentiTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1967,23 +2065,18 @@ class $$ProdottiTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get nome => $composableBuilder(
-    column: $table.nome,
+  ColumnOrderings<int> get serataId => $composableBuilder(
+    column: $table.serataId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get alimentoId => $composableBuilder(
+    column: $table.alimentoId,
     builder: (column) => ColumnOrderings(column),
   );
 
   ColumnOrderings<double> get prezzo => $composableBuilder(
     column: $table.prezzo,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get menuId => $composableBuilder(
-    column: $table.menuId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get categoria => $composableBuilder(
-    column: $table.categoria,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -1993,9 +2086,9 @@ class $$ProdottiTableOrderingComposer
   );
 }
 
-class $$ProdottiTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ProdottiTable> {
-  $$ProdottiTableAnnotationComposer({
+class $$SerataAlimentiTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SerataAlimentiTable> {
+  $$SerataAlimentiTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2005,81 +2098,82 @@ class $$ProdottiTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get nome =>
-      $composableBuilder(column: $table.nome, builder: (column) => column);
+  GeneratedColumn<int> get serataId =>
+      $composableBuilder(column: $table.serataId, builder: (column) => column);
+
+  GeneratedColumn<int> get alimentoId => $composableBuilder(
+    column: $table.alimentoId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get prezzo =>
       $composableBuilder(column: $table.prezzo, builder: (column) => column);
-
-  GeneratedColumn<int> get menuId =>
-      $composableBuilder(column: $table.menuId, builder: (column) => column);
-
-  GeneratedColumn<String> get categoria =>
-      $composableBuilder(column: $table.categoria, builder: (column) => column);
 
   GeneratedColumn<int> get quantita =>
       $composableBuilder(column: $table.quantita, builder: (column) => column);
 }
 
-class $$ProdottiTableTableManager
+class $$SerataAlimentiTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $ProdottiTable,
-          ProdottoData,
-          $$ProdottiTableFilterComposer,
-          $$ProdottiTableOrderingComposer,
-          $$ProdottiTableAnnotationComposer,
-          $$ProdottiTableCreateCompanionBuilder,
-          $$ProdottiTableUpdateCompanionBuilder,
+          $SerataAlimentiTable,
+          SerataAlimentoData,
+          $$SerataAlimentiTableFilterComposer,
+          $$SerataAlimentiTableOrderingComposer,
+          $$SerataAlimentiTableAnnotationComposer,
+          $$SerataAlimentiTableCreateCompanionBuilder,
+          $$SerataAlimentiTableUpdateCompanionBuilder,
           (
-            ProdottoData,
-            BaseReferences<_$AppDatabase, $ProdottiTable, ProdottoData>,
+            SerataAlimentoData,
+            BaseReferences<
+              _$AppDatabase,
+              $SerataAlimentiTable,
+              SerataAlimentoData
+            >,
           ),
-          ProdottoData,
+          SerataAlimentoData,
           PrefetchHooks Function()
         > {
-  $$ProdottiTableTableManager(_$AppDatabase db, $ProdottiTable table)
-    : super(
+  $$SerataAlimentiTableTableManager(
+    _$AppDatabase db,
+    $SerataAlimentiTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$ProdottiTableFilterComposer($db: db, $table: table),
+              $$SerataAlimentiTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$ProdottiTableOrderingComposer($db: db, $table: table),
+              $$SerataAlimentiTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$ProdottiTableAnnotationComposer($db: db, $table: table),
+              $$SerataAlimentiTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> nome = const Value.absent(),
+                Value<int> serataId = const Value.absent(),
+                Value<int> alimentoId = const Value.absent(),
                 Value<double> prezzo = const Value.absent(),
-                Value<int> menuId = const Value.absent(),
-                Value<String> categoria = const Value.absent(),
                 Value<int> quantita = const Value.absent(),
-              }) => ProdottiCompanion(
+              }) => SerataAlimentiCompanion(
                 id: id,
-                nome: nome,
+                serataId: serataId,
+                alimentoId: alimentoId,
                 prezzo: prezzo,
-                menuId: menuId,
-                categoria: categoria,
                 quantita: quantita,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String nome,
+                required int serataId,
+                required int alimentoId,
                 required double prezzo,
-                required int menuId,
-                required String categoria,
                 Value<int> quantita = const Value.absent(),
-              }) => ProdottiCompanion.insert(
+              }) => SerataAlimentiCompanion.insert(
                 id: id,
-                nome: nome,
+                serataId: serataId,
+                alimentoId: alimentoId,
                 prezzo: prezzo,
-                menuId: menuId,
-                categoria: categoria,
                 quantita: quantita,
               ),
           withReferenceMapper: (p0) => p0
@@ -2090,27 +2184,28 @@ class $$ProdottiTableTableManager
       );
 }
 
-typedef $$ProdottiTableProcessedTableManager =
+typedef $$SerataAlimentiTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $ProdottiTable,
-      ProdottoData,
-      $$ProdottiTableFilterComposer,
-      $$ProdottiTableOrderingComposer,
-      $$ProdottiTableAnnotationComposer,
-      $$ProdottiTableCreateCompanionBuilder,
-      $$ProdottiTableUpdateCompanionBuilder,
+      $SerataAlimentiTable,
+      SerataAlimentoData,
+      $$SerataAlimentiTableFilterComposer,
+      $$SerataAlimentiTableOrderingComposer,
+      $$SerataAlimentiTableAnnotationComposer,
+      $$SerataAlimentiTableCreateCompanionBuilder,
+      $$SerataAlimentiTableUpdateCompanionBuilder,
       (
-        ProdottoData,
-        BaseReferences<_$AppDatabase, $ProdottiTable, ProdottoData>,
+        SerataAlimentoData,
+        BaseReferences<_$AppDatabase, $SerataAlimentiTable, SerataAlimentoData>,
       ),
-      ProdottoData,
+      SerataAlimentoData,
       PrefetchHooks Function()
     >;
 typedef $$OrdiniTableCreateCompanionBuilder =
     OrdiniCompanion Function({
       Value<int> id,
       required int serataId,
+      Value<int> numero,
       required DateTime dataOra,
       required double totale,
     });
@@ -2118,6 +2213,7 @@ typedef $$OrdiniTableUpdateCompanionBuilder =
     OrdiniCompanion Function({
       Value<int> id,
       Value<int> serataId,
+      Value<int> numero,
       Value<DateTime> dataOra,
       Value<double> totale,
     });
@@ -2138,6 +2234,11 @@ class $$OrdiniTableFilterComposer
 
   ColumnFilters<int> get serataId => $composableBuilder(
     column: $table.serataId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numero => $composableBuilder(
+    column: $table.numero,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2171,6 +2272,11 @@ class $$OrdiniTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get numero => $composableBuilder(
+    column: $table.numero,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get dataOra => $composableBuilder(
     column: $table.dataOra,
     builder: (column) => ColumnOrderings(column),
@@ -2196,6 +2302,9 @@ class $$OrdiniTableAnnotationComposer
 
   GeneratedColumn<int> get serataId =>
       $composableBuilder(column: $table.serataId, builder: (column) => column);
+
+  GeneratedColumn<int> get numero =>
+      $composableBuilder(column: $table.numero, builder: (column) => column);
 
   GeneratedColumn<DateTime> get dataOra =>
       $composableBuilder(column: $table.dataOra, builder: (column) => column);
@@ -2234,11 +2343,13 @@ class $$OrdiniTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> serataId = const Value.absent(),
+                Value<int> numero = const Value.absent(),
                 Value<DateTime> dataOra = const Value.absent(),
                 Value<double> totale = const Value.absent(),
               }) => OrdiniCompanion(
                 id: id,
                 serataId: serataId,
+                numero: numero,
                 dataOra: dataOra,
                 totale: totale,
               ),
@@ -2246,11 +2357,13 @@ class $$OrdiniTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required int serataId,
+                Value<int> numero = const Value.absent(),
                 required DateTime dataOra,
                 required double totale,
               }) => OrdiniCompanion.insert(
                 id: id,
                 serataId: serataId,
+                numero: numero,
                 dataOra: dataOra,
                 totale: totale,
               ),
@@ -2501,10 +2614,10 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$SerateTableTableManager get serate =>
       $$SerateTableTableManager(_db, _db.serate);
-  $$MenusTableTableManager get menus =>
-      $$MenusTableTableManager(_db, _db.menus);
-  $$ProdottiTableTableManager get prodotti =>
-      $$ProdottiTableTableManager(_db, _db.prodotti);
+  $$AlimentiTableTableManager get alimenti =>
+      $$AlimentiTableTableManager(_db, _db.alimenti);
+  $$SerataAlimentiTableTableManager get serataAlimenti =>
+      $$SerataAlimentiTableTableManager(_db, _db.serataAlimenti);
   $$OrdiniTableTableManager get ordini =>
       $$OrdiniTableTableManager(_db, _db.ordini);
   $$OrdiniItemsTableTableManager get ordiniItems =>

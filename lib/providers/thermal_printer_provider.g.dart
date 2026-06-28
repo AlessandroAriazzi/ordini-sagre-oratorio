@@ -35,7 +35,7 @@ final class ThermalPrinterNotifierProvider
 }
 
 String _$thermalPrinterNotifierHash() =>
-    r'b58e93a70980ecf3a74b03d088958dd5f1e2c2ae';
+    r'8f6fa910b46e8a566a72d2d6e76ef2506a31e388';
 
 abstract class _$ThermalPrinterNotifier
     extends $AsyncNotifier<ThermalPrinterConfig> {

@@ -32,9 +32,13 @@ dependencies:
   flutter_thermal_printer: ^2.2.1
   
   # UI
+  google_fonts: ^6.2.1
   intl: ^0.20.2
   flutter_launcher_icons: ^0.14.4
   shared_preferences: ^2.5.3
+  flutter_localization: ^0.4.1
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

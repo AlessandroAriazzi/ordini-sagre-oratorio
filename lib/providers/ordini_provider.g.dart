@@ -50,7 +50,7 @@ final class OrdiniNotifierProvider
   }
 }
 
-String _$ordiniNotifierHash() => r'aa81837d3fb6e4d76cd2c935880be5b5d4ad29b7';
+String _$ordiniNotifierHash() => r'ed1fb3e4ec31a00764d946b25097b8c92f6e4f55';
 
 final class OrdiniNotifierFamily extends $Family
     with

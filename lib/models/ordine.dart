@@ -1,6 +1,7 @@
 class Ordine {
   final int? id;
   final int serataId;
+  final int numero;
   final DateTime dataOra;
   final List<OrdineItem> items;
   final double totale;
@@ -8,6 +9,7 @@ class Ordine {
   Ordine({
     this.id,
     required this.serataId,
+    this.numero = 0,
     required this.dataOra,
     this.items = const [],
     this.totale = 0.0,
@@ -16,6 +18,7 @@ class Ordine {
   Ordine copyWith({
     int? id,
     int? serataId,
+    int? numero,
     DateTime? dataOra,
     List<OrdineItem>? items,
     double? totale,
@@ -23,6 +26,7 @@ class Ordine {
     return Ordine(
       id: id ?? this.id,
       serataId: serataId ?? this.serataId,
+      numero: numero ?? this.numero,
       dataOra: dataOra ?? this.dataOra,
       items: items ?? this.items,
       totale: totale ?? this.totale,
