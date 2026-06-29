@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/serata.dart' as models;
 import '../models/alimento.dart';
+import '../enums/category_colors.dart';
 import '../models/serata_alimento.dart';
 import '../providers/serate_provider.dart';
 import '../providers/serata_alimenti_provider.dart';
@@ -1024,12 +1025,11 @@ class _DetailPanelState extends ConsumerState<_DetailPanel> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Row(
                     children: [
-                      Expanded(child: Text('PRODOTTO', style: _thSt)),
-                      SizedBox(width: 110, child: Text('CATEGORIA', style: _thSt)),
-                      SizedBox(
-                          width: 90,
-                          child: Text('PREZZO', style: _thSt, textAlign: TextAlign.right)),
-                      const SizedBox(width: 72),
+                      Expanded(flex: 4, child: Text('PRODOTTO', style: _thSt)),
+                      Expanded(flex: 2, child: Text('CATEGORIA', style: _thSt)),
+                      Expanded(flex: 2, child: Text('PREZZO', style: _thSt, textAlign: TextAlign.right)),
+                      Expanded(flex: 2, child: Text('DISPONIBILITÀ', style: _thSt, textAlign: TextAlign.right)),
+                      const SizedBox(width: 48),
                     ],
                   ),
                 ),
@@ -1115,43 +1115,42 @@ class _DetailPanelState extends ConsumerState<_DetailPanel> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
       child: Row(
         children: [
-          // Icon + name
+          // Prodotto
           Expanded(
-            child: Row(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(nome,
-                          style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: _onSurface)),
-                      if (esaurito)
-                        Text('esaurito',
-                            style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: _danger,
-                                fontWeight: FontWeight.w600))
-                      else if (low)
-                        Text('${sa.quantita} rimanenti',
-                            style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: _warning,
-                                fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
+                Text(nome,
+                    style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: _onSurface),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                if (esaurito)
+                  Text('esaurito',
+                      style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: _danger,
+                          fontWeight: FontWeight.w600))
+                else if (low)
+                  Text('${sa.quantita} rimanenti',
+                      style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: _warning,
+                          fontWeight: FontWeight.w600)),
               ],
             ),
           ),
           // Categoria badge
-          SizedBox(width: 110, child: _CategoriaBadge(cat)),
+          Expanded(
+            flex: 2,
+            child: _CategoriaBadge(cat),
+          ),
           // Prezzo (editable)
-          SizedBox(
-            width: 90,
+          Expanded(
+            flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
               child: InkWell(
@@ -1175,19 +1174,38 @@ class _DetailPanelState extends ConsumerState<_DetailPanel> {
               ),
             ),
           ),
+          // Disponibilità (editable)
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: () => _showEditQuantita(sa.alimentoId, nome, sa.quantita),
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('${sa.quantita}',
+                          style: GoogleFonts.jetBrainsMono(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: esaurito ? _danger : low ? _warning : _onSurface)),
+                      const SizedBox(width: 3),
+                      const Icon(Icons.edit_outlined, size: 11, color: _outline),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           // Actions
           SizedBox(
-            width: 72,
+            width: 48,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.format_list_numbered_rounded, size: 15),
-                  color: _onSurfaceVar,
-                  tooltip: esaurito ? 'Imposta quantità' : 'Quantità: ${sa.quantita}',
-                  onPressed: () => _showEditQuantita(sa.alimentoId, nome, sa.quantita),
-                  visualDensity: VisualDensity.compact,
-                ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded, size: 15),
                   color: _danger,
@@ -1215,7 +1233,7 @@ class _CategoryGroupHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _catBadgeColors[categoria] ?? _onSurfaceVar;
+    final color = CategoryColors.accentFor(categoria);
     return Container(
       color: _surface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1807,22 +1825,13 @@ class _DateField extends StatelessWidget {
 
 // ─── Categoria Badge ──────────────────────────────────────────────────────────
 
-const _catBadgeColors = {
-  'Primo':        Color(0xFF006C49),
-  'Secondo':      Color(0xFF005AA3),
-  'Contorno':     Color(0xFF6D4C41),
-  'Torta fritta': Color(0xFFF59E0B),
-  'Bevanda':      Color(0xFF6366F1),
-  'Dolce':        Color(0xFFEC4899),
-};
-
 class _CategoriaBadge extends StatelessWidget {
   final String categoria;
   const _CategoriaBadge(this.categoria);
 
   @override
   Widget build(BuildContext context) {
-    final c = _catBadgeColors[categoria] ?? _onSurfaceVar;
+    final c = CategoryColors.accentFor(categoria);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(

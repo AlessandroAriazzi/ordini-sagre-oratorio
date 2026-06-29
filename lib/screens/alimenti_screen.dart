@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../enums/category_colors.dart';
 import '../models/alimento.dart';
 import '../providers/alimenti_provider.dart';
 import '../theme.dart';
@@ -14,45 +15,10 @@ const _onSurfaceVar = Color(0xFF45464D);
 const _outline      = Color(0xFF76777D);
 const _outlineVar   = Color(0xFFC6C6CD);
 const _primary      = Color(0xFF000000);
-const _secondary    = Color(0xFF006C49);
-const _secondaryCont= Color(0xFF6CF8BB);
 const _danger       = Color(0xFFBA1A1A);
 // ──────────────────────────────────────────────────────────────────────────────
 
 const _categorie = ['Primo', 'Secondo', 'Contorno', 'Torta fritta', 'Bevanda', 'Dolce'];
-
-// Category badge colors
-Color _catBadgeBg(String cat) {
-  switch (cat) {
-    case 'Primo':
-    case 'Secondo':
-    case 'Contorno':
-    case 'Torta fritta':
-      return _secondaryCont.withValues(alpha: 0.45);
-    case 'Bevanda':
-      return const Color(0xFFBFE0FF);
-    case 'Dolce':
-      return const Color(0xFFE0E3E5);
-    default:
-      return const Color(0xFFE0E3E5);
-  }
-}
-
-Color _catBadgeText(String cat) {
-  switch (cat) {
-    case 'Primo':
-    case 'Secondo':
-    case 'Contorno':
-    case 'Torta fritta':
-      return _secondary;
-    case 'Bevanda':
-      return const Color(0xFF005AA3);
-    case 'Dolce':
-      return _onSurfaceVar;
-    default:
-      return _onSurfaceVar;
-  }
-}
 
 
 
@@ -543,18 +509,16 @@ class _AlimentiScreenState extends ConsumerState<AlimentiScreen> {
                                       horizontal: 16, vertical: 10),
                                   child: Row(
                                     children: [
-                                      const SizedBox(width: 48),
                                       Expanded(
-                                          flex: 3,
+                                          flex: 4,
                                           child: Text('NOME',
                                               style: _headerStyle)),
-                                      SizedBox(
-                                          width: 150,
+                                      Expanded(
+                                          flex: 2,
                                           child: Text('CATEGORIA',
-                                              style: _headerStyle,
-                                              textAlign: TextAlign.center)),
-                                      SizedBox(
-                                          width: 140,
+                                              style: _headerStyle)),
+                                      Expanded(
+                                          flex: 2,
                                           child: Text('PREZZO DEFAULT',
                                               style: _headerStyle,
                                               textAlign: TextAlign.right)),
@@ -618,13 +582,33 @@ class _AlimentiScreenState extends ConsumerState<AlimentiScreen> {
     );
   }
 
-  // JetBrains Mono per header tabella (label-mono dal design)
   static final _headerStyle = GoogleFonts.jetBrainsMono(
     fontSize: 11,
     fontWeight: FontWeight.w500,
     color: _onSurfaceVar,
     letterSpacing: 0.5,
   );
+}
+
+class _CategoriaBadge extends StatelessWidget {
+  final String categoria;
+  const _CategoriaBadge(this.categoria);
+
+  @override
+  Widget build(BuildContext context) {
+    final c = CategoryColors.accentFor(categoria);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: c.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: c.withValues(alpha: 0.25)),
+      ),
+      child: Text(categoria,
+          style: GoogleFonts.jetBrainsMono(
+              fontSize: 10, fontWeight: FontWeight.w600, color: c)),
+    );
+  }
 }
 
 class _AlimentoRow extends StatefulWidget {
@@ -656,42 +640,27 @@ class _AlimentoRowState extends State<_AlimentoRow> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            
             // Nome
             Expanded(
-              flex: 3,
+              flex: 4,
               child: Text(
                 widget.alimento.nome,
                 style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: _onSurface),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             // Categoria badge
-            SizedBox(
-              width: 150,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _catBadgeBg(widget.alimento.categoria),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    widget.alimento.categoria,
-                    style: GoogleFonts.jetBrainsMono(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: _catBadgeText(widget.alimento.categoria)),
-                  ),
-                ),
-              ),
+            Expanded(
+              flex: 2,
+              child: _CategoriaBadge(widget.alimento.categoria),
             ),
             // Prezzo
-            SizedBox(
-              width: 140,
+            Expanded(
+              flex: 2,
               child: Text(
                 '€ ${widget.alimento.prezzoDefault.toStringAsFixed(2)}',
                 style: GoogleFonts.jetBrainsMono(

@@ -292,6 +292,7 @@ class _OrdineScreenState extends ConsumerState<OrdineScreen> {
 
       final bytes = await _buildTicket(ordine, serata, categoriaMap);
       if (!mounted) return;
+      var printed = false;
 
       if (config.connectionType == 'CUPS') {
         final tmpPath = '${Directory.systemTemp.path}/receipt_${ordine.id}.bin';
@@ -300,6 +301,7 @@ class _OrdineScreenState extends ConsumerState<OrdineScreen> {
         try {
           final result = await Process.run('/usr/bin/lp', ['-d', config.name!, '-o', 'raw', tmpPath]);
           if (result.exitCode != 0) throw Exception(result.stderr.toString().trim());
+          printed = true;
         } finally {
           await tmpFile.delete();
         }
@@ -316,6 +318,8 @@ class _OrdineScreenState extends ConsumerState<OrdineScreen> {
             content: Text('Stampante non raggiungibile (${config.address}:${config.port})'),
             backgroundColor: AppTheme.dangerColor,
           ));
+        } else {
+          printed = true;
         }
       } else {
         final plugin = FlutterThermalPrinter.instance;
@@ -349,6 +353,23 @@ class _OrdineScreenState extends ConsumerState<OrdineScreen> {
 
         await plugin.connect(target);
         await plugin.printData(target, bytes);
+        printed = true;
+      }
+      // If printed successfully, create a new empty order and navigate to it
+      if (printed) {
+        try {
+          final newOrdineId = await ref.read(ordiniProvider(serata.id!).notifier).createOrdine();
+          if (!mounted) return;
+          context.go('/ordine/${serata.id}/$newOrdineId');
+        } catch (e) {
+          // ignore navigation/create errors, but notify the user
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Stampato con successo, ma errore creazione nuovo ordine: $e'),
+              backgroundColor: AppTheme.dangerColor,
+            ));
+          }
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -996,7 +1017,17 @@ class _ProductCardState extends State<_ProductCard> {
                   ),
                 )
               else
-                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.successColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${widget.quantitaDisponibile} disp.',
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.successColor),
+                  ),
+                ),
               const SizedBox(height: 20),
               Expanded(
                 child: Text(
