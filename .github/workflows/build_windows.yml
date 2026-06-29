@@ -14,14 +14,20 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.44.0'
           channel: 'stable'
           cache: true
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
 
+      - name: Check versions
+        run: |
+          flutter --version
+          dart --version
+
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --verbose
 
       - name: Build Windows
         run: flutter build windows --release
