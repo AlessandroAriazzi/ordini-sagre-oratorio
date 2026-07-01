@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_localization
   flutter_thermal_printer
   printing
+  sqlite3_flutter_libs
   universal_ble
 )
 
